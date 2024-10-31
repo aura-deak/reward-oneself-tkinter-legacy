@@ -43,9 +43,9 @@ body = body + "<h2>努力心得</h2><table><tr><td>努力项</td><td>心得</td>
 for key,value in 努力心得.items():
     print(value)
     for i in value:
-        内容 = 内容 + f"{i}<br>"
-        print(内容)
-    body = body + f"<tr><td>{key}</td><td>{内容}</td></tr>"
+        if i != "":
+            内容 = 内容 + f"{i}<br>"
+        body = body + f"<tr><td>{key}</td><td>{内容}</td></tr>"
 body = body + "</table>"
 
 

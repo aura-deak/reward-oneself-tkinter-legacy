@@ -50,6 +50,7 @@ def 保存():
 def 重置():
     if ms.askyesno("是否重置？", "是否重置？该操作不可撤销！", icon=ms.WARNING):
         os.remove(数据文件)
+        os.remove(report)
         ms.showinfo("重置成功","重置成功，请重启程序")
         sys.exit()
     else:
@@ -82,7 +83,7 @@ def 刷新表格():
     a = 0
     for key,value in 努力项.items():
         if 努力重复列表[key]:
-            循环 = "🔄"
+            循环 = "（循环）"
         else:
             循环 = ""
 
@@ -228,7 +229,6 @@ def 生成努力日报():
     for i in 努力项实现次数:
         努力项实现次数[i] = 0
     保存()
-    ms.showinfo("努力日报","你的努力日报生成完毕")
     # 使用默认浏览器打开HTML文件
     webbrowser.open('file://' + report)
 
