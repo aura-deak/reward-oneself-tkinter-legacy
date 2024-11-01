@@ -13,18 +13,27 @@ from datetime import datetime as dt
 
 # 获取当前脚本所在的文件夹路径
 文件路径 = os.path.dirname(os.path.abspath(__file__))
+
+# 构建 login.py 文件的绝对路径
+login = os.path.join(文件路径, 'login.py')
+
+with open(login, "r", encoding="utf-8") as file:
+    exec(file.read())
+
+
 # 构建HTML文件的绝对路径
 index_html = os.path.join(文件路径, 'interdoction/index.html')
 # 构建 report.html 文件的绝对路径
-report = os.path.join(文件路径, 'interdoction/report.html')
+report = os.path.join(文件路径, f'interdoction/{username}_report.html')
 # 构建 日报生成.py 文件的绝对路径
 日报生成 = os.path.join(文件路径, '日报生成.py')
-# 构建 datas.reward 文件的绝对路径
-数据文件 = os.path.join(文件路径, 'datas.reward')
-# 构建 kuakua.reward 文件的绝对路径
-夸夸助手文件 = os.path.join(文件路径, 'kuakua.reward')
+# 构建 data/datas.reward 文件的绝对路径
+数据文件 = os.path.join(文件路径, f'data/{username}.reward')
+# 构建 data/kuakua.txt 文件的绝对路径
+夸夸助手文件 = os.path.join(文件路径, 'data/kuakua.txt')
 # 构建 tasks_file.txt 文件的绝对路径
-tasks_file = os.path.join(文件路径, 'tasks.txt')
+tasks_file = os.path.join(文件路径, 'data/tasks.txt')
+
 
 def 检验变量(变量):
     if 变量 != None and 变量 != "":
@@ -51,6 +60,20 @@ def 重置():
     if ms.askyesno("是否重置？", "是否重置？该操作不可撤销！", icon=ms.WARNING):
         os.remove(数据文件)
         os.remove(report)
+
+        #清除密码
+        # 构建data_file.txt文件的绝对路径
+        data_file = os.path.join(文件路径, 'data/passwd_file.txt')
+        with open(data_file,mode="r",encoding="utf-8") as d:
+            username_passwd_data = d.read()
+            username_passwd_data = eval(username_passwd_data)
+        with open(data_file,mode="w",encoding="utf-8") as d:
+            del username_passwd_data[username]
+            d.write(str(username_passwd_data))
+
+
+        print(username_passwd_data)
+        d.write(str(username_passwd_data))
         ms.showinfo("重置成功","重置成功，请重启程序")
         sys.exit()
     else:
@@ -232,6 +255,8 @@ def 生成努力日报():
     # 使用默认浏览器打开HTML文件
     webbrowser.open('file://' + report)
 
+
+
 root = tk.Tk()
 root.title("智能任务管理系统 星空2.6")
 root.geometry("800x600")
@@ -268,6 +293,11 @@ except:
     努力优先级列表 = {"阅读" : 2}
     努力重复列表 = {"阅读" : True}
     保存()
+
+    with open(report,mode="w",encoding="utf-8") as report:
+        report.write("")
+
+
     ms.showinfo("初始化成功","初始化成功，请重启程序")
     sys.exit()
 else:

@@ -5,10 +5,10 @@ import os
 文件路径 = os.path.dirname(os.path.abspath(__file__))
 # 构建 日报生成模板.html 文件的绝对路径
 日报生成模板 = os.path.join(文件路径, '日报生成模板.html')
-# 构建 datas.reward 文件的绝对路径
-数据文件 = os.path.join(文件路径, 'datas.reward')
+# 构建 data/datas.reward 文件的绝对路径
+数据文件 = os.path.join(文件路径, 'data/datas.reward')
 # 构建 report.html 文件的绝对路径
-日报内容 = os.path.join(文件路径, 'interdoction/report.html')
+日报内容 = os.path.join(文件路径, f'interdoction/{username}_report.html')
 
 body = ""
 
