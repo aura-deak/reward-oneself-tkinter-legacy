@@ -29,7 +29,6 @@ def 新建用户(username):
         ms.showinfo("登录",f"你将要创建一个新用户{username}")
         passwd = 获得输入(f"{username}的密码")
         username_passwd_data[username] = passwd
-        print(username_passwd_data)
         d.write(str(username_passwd_data))
         ms.showinfo("登录",f"{username}注册成功")
 
@@ -47,18 +46,20 @@ while True:
     except:
         with open(data_file,mode="w",encoding="utf-8") as d:
             d.write("{}")
-            ms.showinfo("登录","该应用程序目前没有账户，现在进入新建用户向导")
-            新建用户(username)
-    
-    if not username in data.keys():
-        if ms.askyesno("登录",f"{username}不在已有的用户中，是否新建？"):
-            新建用户(username)
-            break
+        
+        ms.showinfo("登录","该应用程序目前没有账户，现在进入新建用户向导")
+        新建用户(username)
+        break
     else:
-        if 获得输入(f"{username}的密码") == data[username]:
-            break
+        if not username in data.keys():
+            if ms.askyesno("登录",f"{username}不在已有的用户中，是否新建？"):
+                新建用户(username)
+                break
         else:
-            ms.showwarning("登录","密码错误！")
+            if 获得输入(f"{username}的密码") == data[username]:
+                break
+            else:
+                ms.showwarning("登录","密码错误！")
 
 
 
