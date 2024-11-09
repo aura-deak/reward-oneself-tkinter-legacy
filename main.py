@@ -106,14 +106,14 @@ def 刷新表格():
     a = 0
     for key,value in 努力项.items():
         if 努力重复列表[key]:
-            循环 = "（循环）"
+            循环 = "是"
         else:
-            循环 = ""
+            循环 = "否"
 
         if 努力优先级列表[key] >= a:
-            努力表格.insert("", 0, values=(f"{key}（{努力优先级列表[key]}）{循环}", value))
+            努力表格.insert("", 0, values=(key, value ,努力优先级列表[key] ,循环))
         else:
-            努力表格.insert("", "end", values=(f"{key}（{努力优先级列表[key]}）{循环}", value))
+            努力表格.insert("", "end", values=(key, value ,努力优先级列表[key] ,循环))
         a = 努力优先级列表[key]
 def 添加奖励():
     奖励 = sim.askstring("添加奖励","奖励名称",parent=root)
@@ -313,11 +313,21 @@ else:
 奖励表格 = ttk.Treeview(root, columns=("key", "value"), show="headings")
 奖励表格.heading("key", text="奖励项")
 奖励表格.heading("value", text="分值")
+奖励表格.column("key", width=200, minwidth=200, anchor='center')
+奖励表格.column("value", width=200, minwidth=200, anchor='center')
 奖励表格.place(x=0,y=0,width=400,height=400)
-努力表格 = ttk.Treeview(root, columns=("key", "value"), show="headings")
-努力表格.heading("key", text="努力项（优先级）")
+
+努力表格 = ttk.Treeview(root, columns=("key", "value", "priority", "repetition"), show="headings")
+努力表格.heading("key", text="努力项")
 努力表格.heading("value", text="分值")
+努力表格.heading("priority", text="优先级")
+努力表格.heading("repetition", text="重复")
+努力表格.column("key", width=100, minwidth=100, anchor='center')
+努力表格.column("value", width=100,anchor='center')
+努力表格.column("priority", width=100,anchor='center')
+努力表格.column("repetition", width=100, anchor='center')
 努力表格.place(x=400,y=0,width=400,height=400)
+
 刷新表格()
 
 添加奖励按钮 = tk.Button(root,text="添加奖励",command=添加奖励)
