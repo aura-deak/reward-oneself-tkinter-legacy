@@ -33,6 +33,11 @@ def 新建用户(username):
         ms.showinfo("登录",f"{username}注册成功")
 
 
+root = tk.Tk()
+root.title("智能任务管理系统 星空2.6")
+root.geometry("0x0")
+root.maxsize(width=800,height=600)
+root.withdraw()
 
 
 while True:
