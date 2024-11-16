@@ -1,3 +1,4 @@
 data/passwd_file.txt
 data/*.reward
-interdoction/*_report.html
+interdoction/*.html
+!interdoction/index.html
