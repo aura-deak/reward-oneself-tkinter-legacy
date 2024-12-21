@@ -14,13 +14,6 @@ from datetime import datetime as dt
 # 获取当前脚本所在的文件夹路径
 文件路径 = os.path.dirname(os.path.abspath(__file__))
 
-# 构建 login.py 文件的绝对路径
-login = os.path.join(文件路径, 'login.py')
-
-with open(login, "r", encoding="utf-8") as file:
-    exec(file.read())
-
-
 # 构建HTML文件的绝对路径
 index_html = os.path.join(文件路径, 'interdoction/index.html')
 # 构建 report.html 文件的绝对路径
@@ -29,8 +22,6 @@ report = os.path.join(文件路径, f'interdoction/{username}_report.html')
 日报生成 = os.path.join(文件路径, '日报生成.py')
 # 构建 data/datas.reward 文件的绝对路径
 数据文件 = os.path.join(文件路径, f'data/{username}.reward')
-# 构建 data/kuakua.txt 文件的绝对路径
-夸夸助手文件 = os.path.join(文件路径, 'data/kuakua.txt')
 # 构建 tasks_file.txt 文件的绝对路径
 tasks_file = os.path.join(文件路径, 'data/tasks.txt')
 
@@ -49,7 +40,6 @@ def 保存():
         数据["努力项实现次数"] = 努力项实现次数
         数据["奖励项兑换次数"] = 奖励项兑换次数
         数据["积分"] = 积分
-        数据["夸夸助手"] = 夸夸助手
         数据["努力心得"] = 努力心得
         数据["奖励心得"] = 奖励心得
         数据["努力优先级列表"] = 努力优先级列表
@@ -84,14 +74,6 @@ def 展示介绍():
     # 使用默认浏览器打开HTML文件
     webbrowser.open('file://' + index_html)
 
-def 开关夸夸助手():
-    global 夸夸助手
-    夸夸助手 = not 夸夸助手
-    if 夸夸助手:
-        ms.showinfo("夸夸助手","夸夸助手已开启")
-    else:
-        ms.showinfo("夸夸助手","夸夸助手已关闭")
-    保存()
 
 def 刷新表格():
     for i in 奖励表格.get_children():
@@ -223,14 +205,9 @@ def 兑换努力():
         if 检验变量(努力):
             ms.showwarning("兑换努力",f"{努力}不存在！")
     else:
-        if 夸夸助手:
-            夸夸 = r.choice(夸夸列表)
-            夸夸 = 夸夸.format(努力)
-        else:
-            夸夸 = ""
         积分 += 加分
         努力项实现次数[努力] += 1
-        ms.showinfo("兑换努力",f"兑换{努力}成功！你目前的积分是{积分}。\n{夸夸}")
+        ms.showinfo("兑换努力",f"兑换{努力}成功！你目前的积分是{积分}")
         努力心得[努力].append(sim.askstring("努力心得","在此输入你要记录的信息\n(可以是心得、兑换时间等，也可以什么都不填)",parent=root))
 
         if not 努力重复列表[努力]:
@@ -273,7 +250,6 @@ try:
         努力项实现次数 = 数据["努力项实现次数"]
         奖励项兑换次数 = 数据["奖励项兑换次数"]
         积分 = 数据["积分"]
-        夸夸助手 = 数据["夸夸助手"]
         努力心得 = 数据["努力心得"]
         奖励心得 = 数据["奖励心得"]
         努力优先级列表 = 数据["努力优先级列表"]
@@ -287,7 +263,6 @@ except:
     努力项实现次数 = {'阅读': 0}
     奖励项兑换次数 = {'喝奶茶': 0}
     积分 = 0
-    夸夸助手 = False
     努力心得 = {'阅读':[]}
     奖励心得 = {'喝奶茶':[]}
     努力优先级列表 = {"阅读" : 2}
@@ -301,8 +276,6 @@ except:
     ms.showinfo("初始化成功","初始化成功，请重启程序")
     sys.exit()
 else:
-    with open(夸夸助手文件,encoding="utf-8") as d:
-        夸夸列表 = d.readlines()
 
     with open(tasks_file,encoding="utf-8") as d:
         tasks =  d.read()
@@ -347,9 +320,6 @@ else:
 
 兑换努力按钮 = tk.ttk.Button(root,text="兑换努力",command=兑换努力)
 兑换努力按钮.place(x=400,y=460,width=400)
-
-夸夸助手开关按钮 = tk.ttk.Button(root,text="开关夸夸助手",command=开关夸夸助手)
-夸夸助手开关按钮.place(x=0,y=550)
 
 重置按钮 = tk.ttk.Button(root,text="重置",command=重置)
 重置按钮.place(x=0,y=500)
