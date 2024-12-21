@@ -8,7 +8,7 @@ import os
 # 构建 data/datas.reward 文件的绝对路径
 数据文件 = os.path.join(文件路径, 'data/datas.reward')
 # 构建 report.html 文件的绝对路径
-日报内容 = os.path.join(文件路径, f'interdoction/{username}_report.html')
+日报内容 = os.path.join(文件路径, f'interdoction/_report.html')
 
 body = ""
 

@@ -17,11 +17,11 @@ from datetime import datetime as dt
 # 构建HTML文件的绝对路径
 index_html = os.path.join(文件路径, 'interdoction/index.html')
 # 构建 report.html 文件的绝对路径
-report = os.path.join(文件路径, f'interdoction/{username}_report.html')
+report = os.path.join(文件路径, f'interdoction/report.html')
 # 构建 日报生成.py 文件的绝对路径
 日报生成 = os.path.join(文件路径, '日报生成.py')
 # 构建 data/datas.reward 文件的绝对路径
-数据文件 = os.path.join(文件路径, f'data/{username}.reward')
+数据文件 = os.path.join(文件路径, f'data/data.reward')
 # 构建 tasks_file.txt 文件的绝对路径
 tasks_file = os.path.join(文件路径, 'data/tasks.txt')
 
