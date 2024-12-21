@@ -331,22 +331,22 @@ else:
 刷新表格()
 
 添加奖励按钮 = tk.ttk.Button(root,text="添加奖励",command=添加奖励)
-添加奖励按钮.place(x=0,y=400)
+添加奖励按钮.place(x=0,y=400,width=400)
 
 删除奖励按钮 = tk.ttk.Button(root,text="删除奖励",command=删除奖励)
-删除奖励按钮.place(x=150,y=400)
+删除奖励按钮.place(x=0,y=430,width=400)
 
 兑换奖励按钮 = tk.ttk.Button(root,text="兑换奖励",command=兑换奖励)
-兑换奖励按钮.place(x=300,y=400)
+兑换奖励按钮.place(x=0,y=460,width=400)
 
 添加努力按钮 = tk.ttk.Button(root,text="添加努力",command=添加努力)
-添加努力按钮.place(x=400,y=400)
+添加努力按钮.place(x=400,y=400,width=400)
 
 删除努力按钮 = tk.ttk.Button(root,text="删除努力",command=删除努力)
-删除努力按钮.place(x=550,y=400)
+删除努力按钮.place(x=400,y=430,width=400)
 
 兑换努力按钮 = tk.ttk.Button(root,text="兑换努力",command=兑换努力)
-兑换努力按钮.place(x=700,y=400)
+兑换努力按钮.place(x=400,y=460,width=400)
 
 夸夸助手开关按钮 = tk.ttk.Button(root,text="开关夸夸助手",command=开关夸夸助手)
 夸夸助手开关按钮.place(x=0,y=550)
