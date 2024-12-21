@@ -2,8 +2,8 @@
 
 import tkinter as tk
 from tkinter import messagebox as ms
-from tkinter import ttk
 from tkinter import simpledialog as sim
+from tkinter import ttk
 import os
 import sys
 import random as r
@@ -181,11 +181,11 @@ def 添加努力():
         dialog.title("选择优先级")
         dialog.geometry("300x50")
         dialog.protocol("WM_DELETE_WINDOW", lambda: None)
-        高优先级按钮 = tk.Button(dialog,text="高优先级",command= lambda: button_action(3))
+        高优先级按钮 = tk.ttk.Button(dialog,text="高优先级",command= lambda: button_action(3))
         高优先级按钮.place(x=0,y=0)
-        中优先级按钮 = tk.Button(dialog,text="中优先级",command= lambda: button_action(2))
+        中优先级按钮 = tk.ttk.Button(dialog,text="中优先级",command= lambda: button_action(2))
         中优先级按钮.place(x=100,y=0)
-        低优先级按钮 = tk.Button(dialog,text="低优先级",command= lambda: button_action(1))
+        低优先级按钮 = tk.ttk.Button(dialog,text="低优先级",command= lambda: button_action(1))
         低优先级按钮.place(x=200,y=0)
         root.wait_window(dialog)
         重复 = ms.askyesno("是否重复", "是否重复\n（如果该任务只需要执行一次，那么请选择否，否则选择是）") 
@@ -330,34 +330,34 @@ else:
 
 刷新表格()
 
-添加奖励按钮 = tk.Button(root,text="添加奖励",command=添加奖励)
+添加奖励按钮 = tk.ttk.Button(root,text="添加奖励",command=添加奖励)
 添加奖励按钮.place(x=0,y=400)
 
-删除奖励按钮 = tk.Button(root,text="删除奖励",command=删除奖励)
+删除奖励按钮 = tk.ttk.Button(root,text="删除奖励",command=删除奖励)
 删除奖励按钮.place(x=150,y=400)
 
-兑换奖励按钮 = tk.Button(root,text="兑换奖励",command=兑换奖励)
+兑换奖励按钮 = tk.ttk.Button(root,text="兑换奖励",command=兑换奖励)
 兑换奖励按钮.place(x=300,y=400)
 
-添加努力按钮 = tk.Button(root,text="添加努力",command=添加努力)
+添加努力按钮 = tk.ttk.Button(root,text="添加努力",command=添加努力)
 添加努力按钮.place(x=400,y=400)
 
-删除努力按钮 = tk.Button(root,text="删除努力",command=删除努力)
+删除努力按钮 = tk.ttk.Button(root,text="删除努力",command=删除努力)
 删除努力按钮.place(x=550,y=400)
 
-兑换努力按钮 = tk.Button(root,text="兑换努力",command=兑换努力)
+兑换努力按钮 = tk.ttk.Button(root,text="兑换努力",command=兑换努力)
 兑换努力按钮.place(x=700,y=400)
 
-夸夸助手开关按钮 = tk.Button(root,text="开关夸夸助手",command=开关夸夸助手)
+夸夸助手开关按钮 = tk.ttk.Button(root,text="开关夸夸助手",command=开关夸夸助手)
 夸夸助手开关按钮.place(x=0,y=550)
 
-重置按钮 = tk.Button(root,text="重置",command=重置)
+重置按钮 = tk.ttk.Button(root,text="重置",command=重置)
 重置按钮.place(x=0,y=500)
 
-介绍按钮 = tk.Button(root,text="查看介绍",command=展示介绍)
+介绍按钮 = tk.ttk.Button(root,text="查看介绍",command=展示介绍)
 介绍按钮.place(x=700,y=550)
 
-日报按钮 = tk.Button(root,text="生成日报",command=生成努力日报)
+日报按钮 = tk.ttk.Button(root,text="生成日报",command=生成努力日报)
 日报按钮.place(x=700,y=500)
 
 root.mainloop()
