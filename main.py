@@ -4,6 +4,8 @@ import tkinter as tk
 from tkinter import messagebox as ms
 from tkinter import simpledialog as sim
 from tkinter import ttk
+from tkinter import FLAT
+from tkinter import font
 import os
 import sys
 import random as r
@@ -75,7 +77,7 @@ def 展示介绍():
     webbrowser.open('file://' + index_html)
 
 
-def 刷新表格():
+def 刷新():
     for i in 奖励表格.get_children():
         奖励表格.delete(i)
     
@@ -97,22 +99,31 @@ def 刷新表格():
         else:
             努力表格.insert("", "end", values=(key, value ,努力优先级列表[key] ,循环))
         a = 努力优先级列表[key]
+
+    分值显示.config(state=tk.NORMAL)
+    分值显示.delete("1.0", tk.END)
+    分值显示.insert("insert",f"目前积分：{积分}")
+    my_font = font.Font(family="Helvetica", size=16)
+    分值显示.tag_configure("center", justify='center',font=my_font)
+    分值显示.tag_add("center", "1.0", "end")
+    分值显示.config(state=tk.DISABLED)
+
 def 添加奖励():
-    奖励 = sim.askstring("添加奖励","奖励名称",parent=root)
-    分值 = sim.askinteger("添加奖励","奖励分值",parent=root)
+    奖励 = sim.askstring("添加奖励","奖励名称")
+    分值 = sim.askinteger("添加奖励","奖励分值")
     if 检验变量(奖励) and 检验变量(分值):
         奖励项[奖励] = 分值
         奖励项兑换次数[奖励] = 0
         奖励心得[奖励] = []
-        刷新表格()
+        刷新()
         ms.showinfo("添加奖励","添加完成")
     保存()
 
 def 删除奖励():
-    奖励 = sim.askstring("删除奖励","奖励名称",parent=root)
+    奖励 = sim.askstring("删除奖励","奖励名称")
     try:
         del 奖励项[奖励]
-        刷新表格()
+        刷新()
         ms.showinfo("删除奖励","删除成功")
         保存()
     except KeyError:
@@ -121,8 +132,7 @@ def 删除奖励():
 
 def 兑换奖励():
     global 积分
-    ms.showinfo("兑换奖励",f"你目前的积分是{积分}")
-    奖励 = sim.askstring("兑换奖励","奖励名称",parent=root)
+    奖励 = sim.askstring("兑换奖励","奖励名称")
     try:
         兑换所需积分 = 奖励项[奖励]
     except KeyError:
@@ -132,15 +142,15 @@ def 兑换奖励():
         if 积分 >= 兑换所需积分:
             积分 -= 兑换所需积分
             奖励项兑换次数[奖励] += 1
-            ms.showinfo("兑换奖励",f"兑换{奖励}成功！你目前的积分是{积分}")
-            奖励心得[奖励].append(sim.askstring("奖励心得","在此输入你要记录的信息\n(可以是心得、兑换时间等，也可以什么都不填)",parent=root))
+            ms.showinfo("兑换奖励",f"兑换{奖励}成功！")
+            奖励心得[奖励].append(sim.askstring("奖励心得","在此输入你要记录的信息\n(可以是心得、兑换时间等，也可以什么都不填)"))
             保存()
         else:
-            ms.showwarning("兑换奖励",f"兑换{奖励}失败！兑换{奖励}需要{兑换所需积分}，你目前的积分是{积分}")
+            ms.showwarning("兑换奖励",f"兑换{奖励}失败！兑换{奖励}需要{兑换所需积分}分")
 
 def 添加努力():
-    努力 = sim.askstring("添加努力","努力名称",parent=root)
-    分值 = sim.askinteger("添加努力","努力分值",parent=root)
+    努力 = sim.askstring("添加努力","努力名称")
+    分值 = sim.askinteger("添加努力","努力分值")
 
     global 优先级
     优先级 = 0
@@ -178,17 +188,17 @@ def 添加努力():
         努力心得[努力] = []
         努力优先级列表[努力] = 优先级
         努力重复列表[努力] = 重复
-        刷新表格()
+        刷新()
         ms.showinfo("添加努力","添加完成")
     保存()
 
 def 删除努力():
-    努力 = sim.askstring("删除努力","努力名称",parent=root)
+    努力 = sim.askstring("删除努力","努力名称")
     try:
         del 努力项[努力]
         del 努力优先级列表[努力]
         del 努力重复列表[努力]
-        刷新表格()
+        刷新()
         ms.showinfo("删除努力","删除成功")
         保存()
     except KeyError:
@@ -197,8 +207,7 @@ def 删除努力():
 
 def 兑换努力():
     global 积分
-    ms.showinfo("兑换努力",f"你目前的积分是{积分}")
-    努力 = sim.askstring("兑换努力","努力名称",parent=root)
+    努力 = sim.askstring("兑换努力","努力名称")
     try:
         加分 = 努力项[努力]
     except KeyError:
@@ -207,14 +216,14 @@ def 兑换努力():
     else:
         积分 += 加分
         努力项实现次数[努力] += 1
-        ms.showinfo("兑换努力",f"兑换{努力}成功！你目前的积分是{积分}")
-        努力心得[努力].append(sim.askstring("努力心得","在此输入你要记录的信息\n(可以是心得、兑换时间等，也可以什么都不填)",parent=root))
+        ms.showinfo("兑换努力",f"兑换{努力}成功！")
+        努力心得[努力].append(sim.askstring("努力心得","在此输入你要记录的信息\n(可以是心得、兑换时间等，也可以什么都不填)"))
 
         if not 努力重复列表[努力]:
             del 努力项[努力]
             del 努力优先级列表[努力]
             del 努力重复列表[努力]
-            刷新表格()
+            刷新()
             ms.showinfo("删除努力","由于该任务没有设置重复，现已被删除")
 
         保存()
@@ -283,12 +292,20 @@ else:
 
     
 
+分值显示 = tk.Text(root,relief=FLAT)
+分值显示.place(x=0,y=0,width=800)
+分值显示.insert("insert","hello,world")
+my_font = font.Font(family="Helvetica", size=16)
+分值显示.tag_configure("center", justify='center',font=my_font)
+分值显示.tag_add("center", "1.0", "end")
+分值显示.config(state=tk.DISABLED)
+
 奖励表格 = ttk.Treeview(root, columns=("key", "value"), show="headings")
 奖励表格.heading("key", text="奖励项")
 奖励表格.heading("value", text="分值")
 奖励表格.column("key", width=200, minwidth=200, anchor='center')
 奖励表格.column("value", width=200, minwidth=200, anchor='center')
-奖励表格.place(x=0,y=0,width=400,height=400)
+奖励表格.place(x=0,y=50,width=400,height=350)
 
 努力表格 = ttk.Treeview(root, columns=("key", "value", "priority", "repetition"), show="headings")
 努力表格.heading("key", text="努力项")
@@ -299,9 +316,9 @@ else:
 努力表格.column("value", width=100,anchor='center')
 努力表格.column("priority", width=100,anchor='center')
 努力表格.column("repetition", width=100, anchor='center')
-努力表格.place(x=400,y=0,width=400,height=400)
+努力表格.place(x=400,y=50,width=400,height=350)
 
-刷新表格()
+刷新()
 
 添加奖励按钮 = tk.ttk.Button(root,text="添加奖励",command=添加奖励)
 添加奖励按钮.place(x=0,y=400,width=400)
