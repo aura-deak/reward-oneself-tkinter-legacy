@@ -244,7 +244,7 @@ def 生成努力日报():
 
 
 root = tk.Tk()
-root.title("智能任务管理系统 星空2.8")
+root.title("奖励自己 星空2.8")
 root.geometry("800x600")
 root.maxsize(width=800,height=600)
 
