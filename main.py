@@ -27,6 +27,8 @@ report = os.path.join(文件路径, f'interdoction/report.html')
 # 构建 tasks_file.txt 文件的绝对路径
 tasks_file = os.path.join(文件路径, 'data/tasks.txt')
 
+一言 = os.path.join(文件路径, 'data/一言.txt')
+
 
 def 检验变量(变量):
     if 变量 != None and 变量 != "":
@@ -52,20 +54,6 @@ def 重置():
     if ms.askyesno("是否重置？", "是否重置？该操作不可撤销！", icon=ms.WARNING):
         os.remove(数据文件)
         os.remove(report)
-
-        #清除密码
-        # 构建data_file.txt文件的绝对路径
-        data_file = os.path.join(文件路径, 'data/passwd_file.txt')
-        with open(data_file,mode="r",encoding="utf-8") as d:
-            username_passwd_data = d.read()
-            username_passwd_data = eval(username_passwd_data)
-        with open(data_file,mode="w",encoding="utf-8") as d:
-            del username_passwd_data[username]
-            d.write(str(username_passwd_data))
-
-
-        print(username_passwd_data)
-        d.write(str(username_passwd_data))
         ms.showinfo("重置成功","重置成功，请重启程序")
         sys.exit()
     else:
@@ -102,8 +90,7 @@ def 刷新():
 
     分值显示.config(state=tk.NORMAL)
     分值显示.delete("1.0", tk.END)
-    分值显示.insert("insert",f"目前积分：{积分}")
-    my_font = font.Font(family="Helvetica", size=16)
+    分值显示.insert("insert",f"目前积分：{积分}\n{r.choice(一言)}")
     分值显示.tag_configure("center", justify='center',font=my_font)
     分值显示.tag_add("center", "1.0", "end")
     分值显示.config(state=tk.DISABLED)
@@ -289,13 +276,15 @@ else:
     with open(tasks_file,encoding="utf-8") as d:
         tasks =  d.read()
         tasks = eval(tasks)
+    with open(一言,encoding="utf-8") as d:
+        一言 = d.readlines()
 
     
 
 分值显示 = tk.Text(root,relief=FLAT)
 分值显示.place(x=0,y=0,width=800)
 分值显示.insert("insert","hello,world")
-my_font = font.Font(family="Helvetica", size=16)
+my_font = font.Font(family="宋体", size=16)
 分值显示.tag_configure("center", justify='center',font=my_font)
 分值显示.tag_add("center", "1.0", "end")
 分值显示.config(state=tk.DISABLED)
