@@ -1,0 +1,35 @@
+#!/usr/bin/env python3
+import os
+import traceback
+
+class FileHandler:
+    def __init__(self, file_name):
+        self.dir = os.path.dirname(os.path.abspath(__file__))
+        self.file_name = file_name
+
+    def path(self):
+        return f"{self.dir}/{self.file_name}"
+
+    def check(self):
+        return os.path.exists(self.path())
+        
+    def overwrite(self,content):
+        with open(self.path(),encoding="utf-8",mode="w") as d:
+            d.write(content)
+
+    def read(self):
+
+        if self.check():
+            with open(self.path(), encoding="utf-8") as d:
+                return d.read()
+        else:
+            raise FileNotFoundError(f"文件 {self.path()} 不存在")
+    
+    def delete(self):
+        if self.check():
+            os.remove(self.path())
+            return f"删除 {self.path} 成功"
+            del self
+        else:
+            raise FileNotFoundError(f"文件 {self.path()} 不存在")
+

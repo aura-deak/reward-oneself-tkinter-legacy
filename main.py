@@ -1,339 +1,260 @@
-#!/usr/bin/env python3
-
-import tkinter as tk
-from tkinter import messagebox as ms
-from tkinter import simpledialog as sim
+import tkinter
+from tkinter import messagebox
+from tkinter import simpledialog
 from tkinter import ttk
 from tkinter import FLAT
 from tkinter import font
 import os
 import sys
-import random as r
+import random
 import webbrowser
-from datetime import datetime as dt
+from datetime import datetime
+from filehandler import FileHandler
 
+index_html = FileHandler("interdoction/index.html")
+report = FileHandler("interdoction/report.html")
+daily_report = FileHandler("日报生成.py")
+datafile = FileHandler("data/data.reward")
+tasks_file = FileHandler("data/tasks.txt")
+one = FileHandler("data/一言.txt")
 
-# 获取当前脚本所在的文件夹路径
-文件路径 = os.path.dirname(os.path.abspath(__file__))
+def askstring(title, prompt):
+    while True:
+        answer = simpledialog.askstring(title, prompt)
+        if answer is None or answer == "":
+            messagebox.showerror("错误", "输入不能为空")
+        else:
+            break     
+    return answer
 
-# 构建HTML文件的绝对路径
-index_html = os.path.join(文件路径, 'interdoction/index.html')
-# 构建 report.html 文件的绝对路径
-report = os.path.join(文件路径, f'interdoction/report.html')
-# 构建 日报生成.py 文件的绝对路径
-日报生成 = os.path.join(文件路径, '日报生成.py')
-# 构建 data/datas.reward 文件的绝对路径
-数据文件 = os.path.join(文件路径, f'data/data.reward')
-# 构建 tasks_file.txt 文件的绝对路径
-tasks_file = os.path.join(文件路径, 'data/tasks.txt')
+def askinteger(title, prompt,max=float('inf'), min=0):
+    while True:
+        answer = simpledialog.askinteger(title, prompt)
+        if answer is None:
+            messagebox.showerror("错误", "输入不能为空")
+        elif answer > max or answer < min:
+            messagebox.showerror("错误", f"输入必须在{min}和{max}之间")
+        else:
+            break
+    return answer
 
-一言 = os.path.join(文件路径, 'data/一言.txt')
+def fresh_and_save():
 
+    displayer.update()
+    rewards_table.update()
+    tasks_table.update()
 
-def 检验变量(变量):
-    if 变量 != None and 变量 != "":
-        return True
-    else:
-        return False
-
-def 保存():
-    with open(数据文件,mode="w",encoding="utf-8") as d:
-        数据 = {}
-        数据["努力项"] = 努力项
-        数据["奖励项"] = 奖励项
-        数据["努力项实现次数"] = 努力项实现次数
-        数据["奖励项兑换次数"] = 奖励项兑换次数
-        数据["积分"] = 积分
-        数据["努力心得"] = 努力心得
-        数据["奖励心得"] = 奖励心得
-        数据["努力优先级列表"] = 努力优先级列表
-        数据["努力重复列表"] = 努力重复列表
-        d.write(str(数据))
-        
-def 重置():
-    if ms.askyesno("是否重置？", "是否重置？该操作不可撤销！", icon=ms.WARNING):
-        os.remove(数据文件)
-        os.remove(report)
-        ms.showinfo("重置成功","重置成功，请重启程序")
+    data = {
+        'tasks': task.tasks,
+        'rewards': reward.rewards,
+        'point': point,
+        'priority_list_of_tasks': task.priority_list_of_tasks,
+        'repetition_list_of_tasks': task.repetition_list_of_tasks
+    }
+    datafile.overwrite(str(data))
+    
+def reset():
+    if messagebox.askyesno("是否重置？", "是否重置？该操作不可撤销！", icon=messagebox.WARNING):
+        data = {
+            'tasks': {'阅读': 5},
+            'rewards': {'喝奶茶': 1},
+            'point': 0,
+            'priority_list_of_tasks': {'阅读': 2},
+            'repetition_list_of_tasks': {'阅读': True}
+        }
+        datafile.overwrite(str(data))
+        messagebox.showinfo("重置成功","重置成功，请重启程序")
         sys.exit()
     else:
-        ms.showinfo("重置取消","已取消")
+        messagebox.showinfo("重置取消","已取消")
 
-
-def 展示介绍():
-    # 使用默认浏览器打开HTML文件
-    webbrowser.open('file://' + index_html)
-
-
-def 刷新():
-    for i in 奖励表格.get_children():
-        奖励表格.delete(i)
-    
-    for key,value in 奖励项.items():
-        奖励表格.insert("", "end", values=(key, value))
-
-    for i in 努力表格.get_children():
-        努力表格.delete(i)
-
-    a = 0
-    for key,value in 努力项.items():
-        if 努力重复列表[key]:
-            循环 = "是"
-        else:
-            循环 = "否"
-
-        if 努力优先级列表[key] >= a:
-            努力表格.insert("", 0, values=(key, value ,努力优先级列表[key] ,循环))
-        else:
-            努力表格.insert("", "end", values=(key, value ,努力优先级列表[key] ,循环))
-        a = 努力优先级列表[key]
-
-    分值显示.config(state=tk.NORMAL)
-    分值显示.delete("1.0", tk.END)
-    分值显示.insert("insert",f"目前积分：{积分}\n{r.choice(一言)}")
-    分值显示.tag_configure("center", justify='center',font=my_font)
-    分值显示.tag_add("center", "1.0", "end")
-    分值显示.config(state=tk.DISABLED)
-
-def 添加奖励():
-    奖励 = sim.askstring("添加奖励","奖励名称")
-    分值 = sim.askinteger("添加奖励","奖励分值")
-    if 检验变量(奖励) and 检验变量(分值):
-        奖励项[奖励] = 分值
-        奖励项兑换次数[奖励] = 0
-        奖励心得[奖励] = []
-        刷新()
-        ms.showinfo("添加奖励","添加完成")
-    保存()
-
-def 删除奖励():
-    奖励 = sim.askstring("删除奖励","奖励名称")
-    try:
-        del 奖励项[奖励]
-        刷新()
-        ms.showinfo("删除奖励","删除成功")
-        保存()
-    except KeyError:
-        if 检验变量(奖励):
-            ms.showwarning("删除奖励",f"{奖励}不存在！")
-
-def 兑换奖励():
-    global 积分
-    奖励 = sim.askstring("兑换奖励","奖励名称")
-    try:
-        兑换所需积分 = 奖励项[奖励]
-    except KeyError:
-        if 检验变量(奖励):
-            ms.showwarning("兑换奖励",f"{奖励}不存在！")
-    else:
-        if 积分 >= 兑换所需积分:
-            积分 -= 兑换所需积分
-            奖励项兑换次数[奖励] += 1
-            ms.showinfo("兑换奖励",f"兑换{奖励}成功！")
-            奖励心得[奖励].append(sim.askstring("奖励心得","在此输入你要记录的信息\n(可以是心得、兑换时间等，也可以什么都不填)"))
-            保存()
-        else:
-            ms.showwarning("兑换奖励",f"兑换{奖励}失败！兑换{奖励}需要{兑换所需积分}分")
-
-def 添加努力():
-    努力 = sim.askstring("添加努力","努力名称")
-    分值 = sim.askinteger("添加努力","努力分值")
-
-    global 优先级
-    优先级 = 0
-    def button_action(num):
-        global 优先级
-        优先级 = num
-        print(优先级)
-        dialog.destroy()
-
-    for key, value in tasks.items():
-        if key in 努力:
-            优先级 = value["优先级"]
-            重复 = value["重复"]
-            if ms.askyesno("智能匹配",f"已经智能匹配到以下信息：\n优先级：{优先级}\n重复：{重复}\n请问是否采用该配置"):
-                break
+class tasks():
+    def __init__(self):
+        self.tasks = eval(datafile.read())["tasks"]
+        self.priority_list_of_tasks = eval(datafile.read())["priority_list_of_tasks"]
+        self.repetition_list_of_tasks = eval(datafile.read())["repetition_list_of_tasks"]
+        self.predefined_tasks = eval(tasks_file.read())
+    def get_keys(self):
+        return self.tasks.keys()
+    def get_value(self,key):
+        return self.tasks[key]
+    def get_priority(self,key):
+        return self.priority_list_of_tasks[key]
+    def get_repetition(self,key):
+        return self.repetition_list_of_tasks[key]
+    def add(self):
+        key = askstring("添加任务","请输入任务名称")
+        value = askinteger("添加任务","请输入任务分数")
+        if key in self.tasks:
+            messagebox.showwarning("添加任务",f"{key}已存在")
+        elif key in self.predefined_tasks:
+            print(self.predefined_tasks[key])
+            property = eval(str(self.predefined_tasks[key]))["property"]
+            repetition = eval(str(self.predefined_tasks[key]))["repetition"]
+            if messagebox.askyesno("添加任务",f"智能匹配到任务{key}，是否采用？\n优先级为{property}，是否重复为{repetition}"):
+                self.tasks[key] = value
+                self.priority_list_of_tasks[key] = property
+                self.repetition_list_of_tasks[key] = repetition
+                fresh_and_save()
             else:
-                continue
-    else:
-        dialog = tk.Toplevel(root)
-        dialog.title("选择优先级")
-        dialog.geometry("300x50")
-        dialog.protocol("WM_DELETE_WINDOW", lambda: None)
-        高优先级按钮 = tk.ttk.Button(dialog,text="高优先级",command= lambda: button_action(3))
-        高优先级按钮.place(x=0,y=0)
-        中优先级按钮 = tk.ttk.Button(dialog,text="中优先级",command= lambda: button_action(2))
-        中优先级按钮.place(x=100,y=0)
-        低优先级按钮 = tk.ttk.Button(dialog,text="低优先级",command= lambda: button_action(1))
-        低优先级按钮.place(x=200,y=0)
-        root.wait_window(dialog)
-        重复 = ms.askyesno("是否重复", "是否重复\n（如果该任务只需要执行一次，那么请选择否，否则选择是）") 
+                property = askinteger("添加任务","请输入任务优先级（1-3）",max=3,min=1)
+                repetition = messagebox.askyesno("添加任务","是否为重复任务")
+                self.tasks[key] = value
+                self.priority_list_of_tasks[key] = property
+                self.repetition_list_of_tasks[key] = repetition
+                fresh_and_save()
+        else:
+            property = askinteger("添加任务","请输入任务优先级（1-3）",max=3,min=1)
+            repetition = messagebox.askyesno("添加任务","是否为重复任务")
+            self.tasks[key] = value
+            self.priority_list_of_tasks[key] = property
+            self.repetition_list_of_tasks[key] = repetition
+            fresh_and_save()
+    def complete(self):
+        global point
+        key = askstring("完成任务","请输入任务名称")
+        if key in self.tasks:
+            if self.repetition_list_of_tasks[key]:
+                point += self.tasks[key]
+            else:
+                self.delete(key)
+                print("完成任务",f"{key}没有重复，已删除")
+            messagebox.showinfo("完成任务",f"完成{key}成功")
+            fresh_and_save()
+        else:
+            messagebox.showwarning("完成任务",f"{key}不存在")
+    def delete(self, key =""):
+        if key == "":
+            key = askstring("删除任务","请输入任务名称")
+        if key in self.tasks:
+            del self.tasks[key]
+            del self.priority_list_of_tasks[key]
+            del self.repetition_list_of_tasks[key]
+            messagebox.showinfo("删除任务",f"删除{key}成功")
+            fresh_and_save()
+        else:
+            messagebox.showwarning("删除任务",f"{key}不存在")
 
-    if 检验变量(努力) and 检验变量(分值):
-        努力项[努力] = 分值
-        努力项实现次数[努力] = 0
-        努力心得[努力] = []
-        努力优先级列表[努力] = 优先级
-        努力重复列表[努力] = 重复
-        刷新()
-        ms.showinfo("添加努力","添加完成")
-    保存()
+class rewards():
+    def __init__(self):
+        self.rewards = eval(datafile.read())["rewards"]
+    def get_keys(self):
+        return self.rewards.keys()
+    def get_value(self,key):
+        return self.rewards[key]
+    def add(self):
+        key = askstring("添加奖励","请输入奖励名称")
+        value = askinteger("添加奖励","请输入奖励分数")
+        if key in self.rewards:
+            messagebox.showwarning("添加奖励",f"{key}已存在")
+        else:
+            self.rewards[key] = value
+            fresh_and_save()
+    def complete(self):
+        global point
+        key = askstring("兑换奖励","请输入奖励名称")
+        if key in self.rewards:
+            if point >= self.rewards[key]:
+                point -= self.rewards[key]
+                messagebox.showinfo("兑换奖励",f"兑换{key}成功")
+                fresh_and_save()
+            else:
+                messagebox.showwarning("兑换奖励",f"兑换{key}失败，积分不足")
+        else:
+            messagebox.showwarning("兑换奖励",f"{key}不存在")
+    def delete(self):
+        key = askstring("删除奖励","请输入奖励名称")
+        if key in self.rewards:
+            del self.rewards[key]
+            messagebox.showinfo("删除奖励",f"删除{key}成功")
+            fresh_and_save()
+        else:
+            messagebox.showwarning("删除奖励",f"{key}不存在")
+class point_displayer():
+    def __init__(self, root):
+        self.text_widget = tkinter.Text(root, relief=FLAT)
+        self.text_widget.place(x=0,y=0,width=800)
+        self.text_widget.insert("insert", "hello, world")
+        self.my_font = font.Font(size=16)
+        self.text_widget.tag_configure("center", justify='center', font=self.my_font)
+        self.text_widget.tag_add("center", "1.0", "end")
+    def update(self):
+        global point
+        self.text_widget.config(state=tkinter.NORMAL)
+        self.text_widget.delete("1.0", tkinter.END)
+        self.text_widget.insert("insert", f"当前分数为{point}\n{random.choice(one.read().splitlines())}")
+        self.text_widget.tag_configure("center", justify='center',font=self.my_font)
+        self.text_widget.tag_add("center", "1.0", "end")
+        self.text_widget.config(state=tkinter.DISABLED)
+        print(f"当前分数为{point} \n {random.choice(one.read().splitlines())}")
+class table():
+    def __init__(self,root,columns,place,data):
+        self.data = data
+        self.columns = columns
+        self.tree = ttk.Treeview(root, columns=columns, show="headings")
+        for column in columns:
+            self.tree.heading(column, text=column, anchor='center')
+            self.tree.column(column, width=400//len(columns), anchor='center')
+        self.tree.place(x=place[0],y=place[1],width=400,height=350)
+    def update(self):
+        self.tree.delete(*self.tree.get_children())
+        for key in self.data.get_keys():
+            if len(self.columns) == 2:
+                self.tree.insert("", "end", values=(key,self.data.get_value(key)))
+            else:
+                self.tree.insert("", "end", values=(key,self.data.get_value(key), self.data.get_priority(key), self.data.get_repetition(key)))
 
-def 删除努力():
-    努力 = sim.askstring("删除努力","努力名称")
-    try:
-        del 努力项[努力]
-        del 努力优先级列表[努力]
-        del 努力重复列表[努力]
-        刷新()
-        ms.showinfo("删除努力","删除成功")
-        保存()
-    except KeyError:
-        if 检验变量(努力):
-            ms.showwarning("删除努力",f"{努力}不存在！")
-
-def 兑换努力():
-    global 积分
-    努力 = sim.askstring("兑换努力","努力名称")
-    try:
-        加分 = 努力项[努力]
-    except KeyError:
-        if 检验变量(努力):
-            ms.showwarning("兑换努力",f"{努力}不存在！")
-    else:
-        积分 += 加分
-        努力项实现次数[努力] += 1
-        ms.showinfo("兑换努力",f"兑换{努力}成功！")
-        努力心得[努力].append(sim.askstring("努力心得","在此输入你要记录的信息\n(可以是心得、兑换时间等，也可以什么都不填)"))
-
-        if not 努力重复列表[努力]:
-            del 努力项[努力]
-            del 努力优先级列表[努力]
-            del 努力重复列表[努力]
-            刷新()
-            ms.showinfo("删除努力","由于该任务没有设置重复，现已被删除")
-
-        保存()
-
-def 生成努力日报():
-
-    with open(日报生成, "r", encoding="utf-8") as file:
-        exec(file.read())
-    #重置数据
-    for i in 奖励项兑换次数:
-        奖励项兑换次数[i] = 0
-    for i in 努力项实现次数:
-        努力项实现次数[i] = 0
-    保存()
-    # 使用默认浏览器打开HTML文件
-    webbrowser.open('file://' + report)
 
 
 
-root = tk.Tk()
-root.title("奖励自己 星空2.10")
+
+root = tkinter.Tk()
+root.title("奖励自己")
 root.geometry("800x600")
-root.maxsize(width=800,height=600)
+root.resizable(False, False)
 
-#读取文件，如果文件不存在则初始化
 try:
-
-    with open(数据文件,mode="r",encoding="utf-8") as d:
-        数据 = d.read()
-        数据 = eval(数据)
-        努力项 = 数据["努力项"]
-        奖励项 = 数据["奖励项"]
-        努力项实现次数 = 数据["努力项实现次数"]
-        奖励项兑换次数 = 数据["奖励项兑换次数"]
-        积分 = 数据["积分"]
-        努力心得 = 数据["努力心得"]
-        奖励心得 = 数据["奖励心得"]
-        努力优先级列表 = 数据["努力优先级列表"]
-        努力重复列表 = 数据["努力重复列表"]
-
-        
-except:
-
-    努力项 = {'阅读': 5}
-    奖励项 = {'喝奶茶': 1}
-    努力项实现次数 = {'阅读': 0}
-    奖励项兑换次数 = {'喝奶茶': 0}
-    积分 = 0
-    努力心得 = {'阅读':[]}
-    奖励心得 = {'喝奶茶':[]}
-    努力优先级列表 = {"阅读" : 2}
-    努力重复列表 = {"阅读" : True}
-    保存()
-
-    with open(report,mode="w",encoding="utf-8") as report:
-        report.write("")
-
-
-    ms.showinfo("初始化成功","初始化成功，请重启程序")
+    data = eval(datafile.read())
+    point = data["point"]
+except FileNotFoundError:
+    data = {
+        'tasks': {'阅读': 5},
+        'rewards': {'喝奶茶': 1},
+        'point': 0,
+        'priority_list_of_tasks': {'阅读': 2},
+        'repetition_list_of_tasks': {'阅读': True}
+    }
+    datafile.overwrite(str(data))
+    messagebox.showinfo("提示","数据文件不存在，已创建新的数据文件。请重新运行程序。")
     sys.exit()
-else:
 
-    with open(tasks_file,encoding="utf-8") as d:
-        tasks =  d.read()
-        tasks = eval(tasks)
-    with open(一言,encoding="utf-8") as d:
-        一言 = d.readlines()
+reward = rewards()
+task = tasks()
 
-    
+displayer = point_displayer(root)
+rewards_table = table(root,("奖励项","分值"),(0,50),reward)
+tasks_table = table(root,("努力项","分值","优先级","重复"),(400,50),task)
+fresh_and_save()
 
-分值显示 = tk.Text(root,relief=FLAT)
-分值显示.place(x=0,y=0,width=800)
-分值显示.insert("insert","hello,world")
-my_font = font.Font(family="宋体", size=16)
-分值显示.tag_configure("center", justify='center',font=my_font)
-分值显示.tag_add("center", "1.0", "end")
-分值显示.config(state=tk.DISABLED)
+add_reward_button = tkinter.ttk.Button(root, text="添加奖励", command=reward.add)
+add_reward_button.place(x=0,y=400,width=400)
+remove_reward_button = tkinter.ttk.Button(root, text="删除奖励", command=reward.delete)
+remove_reward_button.place(x=0,y=450,width=400)
+complete_reward_button = tkinter.ttk.Button(root, text="兑换奖励", command=reward.complete)
+complete_reward_button.place(x=0,y=500,width=400)
 
-奖励表格 = ttk.Treeview(root, columns=("key", "value"), show="headings")
-奖励表格.heading("key", text="奖励项")
-奖励表格.heading("value", text="分值")
-奖励表格.column("key", width=200, minwidth=200, anchor='center')
-奖励表格.column("value", width=200, minwidth=200, anchor='center')
-奖励表格.place(x=0,y=50,width=400,height=350)
+add_task_button = tkinter.ttk.Button(root, text="添加任务", command=task.add)
+add_task_button.place(x=400,y=400,width=400)
+remove_task_button = tkinter.ttk.Button(root, text="删除任务", command=task.delete)
+remove_task_button.place(x=400,y=450,width=400)
+complete_task_button = tkinter.ttk.Button(root, text="完成任务", command=task.complete)
+complete_task_button.place(x=400,y=500,width=400)
 
-努力表格 = ttk.Treeview(root, columns=("key", "value", "priority", "repetition"), show="headings")
-努力表格.heading("key", text="努力项")
-努力表格.heading("value", text="分值")
-努力表格.heading("priority", text="优先级")
-努力表格.heading("repetition", text="重复")
-努力表格.column("key", width=100, minwidth=100, anchor='center')
-努力表格.column("value", width=100,anchor='center')
-努力表格.column("priority", width=100,anchor='center')
-努力表格.column("repetition", width=100, anchor='center')
-努力表格.place(x=400,y=50,width=400,height=350)
+reset_button = tkinter.ttk.Button(root, text="重置", command=reset)
+reset_button.place(x=0,y=550)
 
-刷新()
+view_introduction_button = tkinter.ttk.Button(root, text="查看说明", command=lambda: webbrowser.open("https://gitee.com/chen-shuhan-1/Intelligent-task-management-system/blob/master/README.md"))
+view_introduction_button.place(x=710,y=550)
 
-添加奖励按钮 = tk.ttk.Button(root,text="添加奖励",command=添加奖励)
-添加奖励按钮.place(x=0,y=400,width=400)
-
-删除奖励按钮 = tk.ttk.Button(root,text="删除奖励",command=删除奖励)
-删除奖励按钮.place(x=0,y=430,width=400)
-
-兑换奖励按钮 = tk.ttk.Button(root,text="兑换奖励",command=兑换奖励)
-兑换奖励按钮.place(x=0,y=460,width=400)
-
-添加努力按钮 = tk.ttk.Button(root,text="添加努力",command=添加努力)
-添加努力按钮.place(x=400,y=400,width=400)
-
-删除努力按钮 = tk.ttk.Button(root,text="删除努力",command=删除努力)
-删除努力按钮.place(x=400,y=430,width=400)
-
-兑换努力按钮 = tk.ttk.Button(root,text="兑换努力",command=兑换努力)
-兑换努力按钮.place(x=400,y=460,width=400)
-
-重置按钮 = tk.ttk.Button(root,text="重置",command=重置)
-重置按钮.place(x=0,y=500)
-
-介绍按钮 = tk.ttk.Button(root,text="查看介绍",command=展示介绍)
-介绍按钮.place(x=700,y=550)
-
-日报按钮 = tk.ttk.Button(root,text="生成日报",command=生成努力日报)
-日报按钮.place(x=700,y=500)
 
 root.mainloop()

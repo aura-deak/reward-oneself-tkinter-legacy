@@ -2,3 +2,5 @@ data/passwd_file.txt
 data/*.reward
 interdoction/*.html
 !interdoction/index.html
+__pycache__
+__pycache__/*
