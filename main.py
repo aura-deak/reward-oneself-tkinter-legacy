@@ -68,7 +68,7 @@ def reset():
     else:
         messagebox.showinfo("重置取消","已取消")
 
-class tasks():
+class Tasks():
     def __init__(self):
         self.tasks = eval(datafile.read())["tasks"]
         self.priority_list_of_tasks = eval(datafile.read())["priority_list_of_tasks"]
@@ -135,7 +135,7 @@ class tasks():
         else:
             messagebox.showwarning("删除任务",f"{key}不存在")
 
-class rewards():
+class Rewards():
     def __init__(self):
         self.rewards = eval(datafile.read())["rewards"]
     def get_keys(self):
@@ -170,7 +170,7 @@ class rewards():
             fresh_and_save()
         else:
             messagebox.showwarning("删除奖励",f"{key}不存在")
-class point_displayer():
+class PointDisplayer():
     def __init__(self, root):
         self.text_widget = tkinter.Text(root, relief=FLAT)
         self.text_widget.place(x=0,y=0,width=800)
@@ -187,7 +187,7 @@ class point_displayer():
         self.text_widget.tag_add("center", "1.0", "end")
         self.text_widget.config(state=tkinter.DISABLED)
         print(f"当前分数为{point} \n {random.choice(one.read().splitlines())}")
-class table():
+class Table():
     def __init__(self,root,columns,place,data):
         self.data = data
         self.columns = columns
@@ -228,12 +228,12 @@ except FileNotFoundError:
     messagebox.showinfo("提示","数据文件不存在，已创建新的数据文件。请重新运行程序。")
     sys.exit()
 
-reward = rewards()
-task = tasks()
+reward = Rewards()
+task = Tasks()
 
-displayer = point_displayer(root)
-rewards_table = table(root,("奖励项","分值"),(0,50),reward)
-tasks_table = table(root,("努力项","分值","优先级","重复"),(400,50),task)
+displayer = PointDisplayer(root)
+rewards_table = Table(root,("奖励项","分值"),(0,50),reward)
+tasks_table = Table(root,("努力项","分值","优先级","重复"),(400,50),task)
 fresh_and_save()
 
 add_reward_button = tkinter.ttk.Button(root, text="添加奖励", command=reward.add)
