@@ -10,13 +10,14 @@ import random
 import webbrowser
 from datetime import datetime
 from filehandler import FileHandler
+import ai_report
 
 index_html = FileHandler("interdoction/index.html")
 report = FileHandler("interdoction/report.html")
 daily_report = FileHandler("日报生成.py")
 datafile = FileHandler("data/data.reward")
-tasks_file = FileHandler("data/tasks.txt")
-one = FileHandler("data/一言.txt")
+tasks_file = FileHandler("static_resources/tasks.txt")
+one = FileHandler("static_resources/一言.txt")
 
 def askstring(title, prompt):
     while True:
@@ -49,7 +50,11 @@ def fresh_and_save():
         'rewards': reward.rewards,
         'point': point,
         'priority_list_of_tasks': task.priority_list_of_tasks,
-        'repetition_list_of_tasks': task.repetition_list_of_tasks
+        'repetition_list_of_tasks': task.repetition_list_of_tasks,
+        'reward_count' : reward.reward_count,
+        'tasks_effort_count' : task.tasks_effort_count,
+        'effort_experience' : task.effort_experience,
+        'reward_experience' : reward.reward_experience
     }
     datafile.overwrite(str(data))
     
@@ -60,7 +65,11 @@ def reset():
             'rewards': {'喝奶茶': 1},
             'point': 0,
             'priority_list_of_tasks': {'阅读': 2},
-            'repetition_list_of_tasks': {'阅读': True}
+            'repetition_list_of_tasks': {'阅读': True},
+            'tasks_effort_count' : {"阅读":0},
+            'reward_count' : {"喝奶茶":0},
+            'effort_experience' : {"阅读":[]},
+            'reward_experience' : {"喝奶茶":[]}
         }
         datafile.overwrite(str(data))
         messagebox.showinfo("重置成功","重置成功，请重启程序")
@@ -73,6 +82,8 @@ class Tasks():
         self.tasks = eval(datafile.read())["tasks"]
         self.priority_list_of_tasks = eval(datafile.read())["priority_list_of_tasks"]
         self.repetition_list_of_tasks = eval(datafile.read())["repetition_list_of_tasks"]
+        self.tasks_effort_count = eval(datafile.read())["tasks_effort_count"]
+        self.effort_experience = eval(datafile.read())["effort_experience"]
         self.predefined_tasks = eval(tasks_file.read())
     def get_keys(self):
         return self.tasks.keys()
@@ -95,6 +106,8 @@ class Tasks():
                 self.tasks[key] = value
                 self.priority_list_of_tasks[key] = property
                 self.repetition_list_of_tasks[key] = repetition
+                self.tasks_effort_count[key] = 0
+                self.effort_experience[key] = []
                 fresh_and_save()
             else:
                 property = askinteger("添加任务","请输入任务优先级（1-3）",max=3,min=1)
@@ -102,6 +115,8 @@ class Tasks():
                 self.tasks[key] = value
                 self.priority_list_of_tasks[key] = property
                 self.repetition_list_of_tasks[key] = repetition
+                self.tasks_effort_count[key] = 0
+                self.effort_experience[key] = []
                 fresh_and_save()
         else:
             property = askinteger("添加任务","请输入任务优先级（1-3）",max=3,min=1)
@@ -116,6 +131,8 @@ class Tasks():
         if key in self.tasks:
             if self.repetition_list_of_tasks[key]:
                 point += self.tasks[key]
+                self.tasks_effort_count[key] += 1
+                self.effort_experience[key].append(askstring("完成任务","请输入心得体会"))
             else:
                 self.delete(key)
                 print("完成任务",f"{key}没有重复，已删除")
@@ -138,6 +155,8 @@ class Tasks():
 class Rewards():
     def __init__(self):
         self.rewards = eval(datafile.read())["rewards"]
+        self.reward_count = eval(datafile.read())["reward_count"]
+        self.reward_experience = eval(datafile.read())["reward_experience"]
     def get_keys(self):
         return self.rewards.keys()
     def get_value(self,key):
@@ -149,6 +168,8 @@ class Rewards():
             messagebox.showwarning("添加奖励",f"{key}已存在")
         else:
             self.rewards[key] = value
+            self.reward_count[key] = 0
+            self.reward_experience[key] = []
             fresh_and_save()
     def complete(self):
         global point
@@ -157,6 +178,8 @@ class Rewards():
             if point >= self.rewards[key]:
                 point -= self.rewards[key]
                 messagebox.showinfo("兑换奖励",f"兑换{key}成功")
+                self.reward_count[key] += 1
+                self.reward_experience[key].append(askstring("兑换奖励","请输入心得体会"))
                 fresh_and_save()
             else:
                 messagebox.showwarning("兑换奖励",f"兑换{key}失败，积分不足")
@@ -210,7 +233,7 @@ class Table():
 
 root = tkinter.Tk()
 root.title("奖励自己")
-root.geometry("800x600")
+root.geometry("800x650")
 root.resizable(False, False)
 
 try:
@@ -222,7 +245,11 @@ except FileNotFoundError:
         'rewards': {'喝奶茶': 1},
         'point': 0,
         'priority_list_of_tasks': {'阅读': 2},
-        'repetition_list_of_tasks': {'阅读': True}
+        'repetition_list_of_tasks': {'阅读': True},
+        'tasks_effort_count' : {"阅读":0},
+        'reward_count' : {"喝奶茶":0},
+        'effort_experience' : {"阅读":[]},
+        'reward_experience' : {"喝奶茶":[]}
     }
     datafile.overwrite(str(data))
     messagebox.showinfo("提示","数据文件不存在，已创建新的数据文件。请重新运行程序。")
@@ -256,5 +283,10 @@ reset_button.place(x=0,y=550)
 view_introduction_button = tkinter.ttk.Button(root, text="查看说明", command=lambda: webbrowser.open("https://gitee.com/chen-shuhan-1/Intelligent-task-management-system/blob/master/README.md"))
 view_introduction_button.place(x=710,y=550)
 
+check_for_update_button = tkinter.ttk.Button(root, text="检查更新", command=lambda: webbrowser.open("https://gitee.com/chen-shuhan-1/Intelligent-task-management-system/releases"))
+check_for_update_button.place(x=0,y=600)
+
+report_button = tkinter.ttk.Button(root, text="生成报告", command=ai_report.main)
+report_button.place(x=710,y=600)
 
 root.mainloop()

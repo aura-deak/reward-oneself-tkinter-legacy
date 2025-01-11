@@ -21,4 +21,11 @@
 
 ## 所使用的开源项目
 
-- [filehandler](https://gitee.com/chen-shuhan-1/filehandler/blob/master/LICENSE)(Apache License 2.0)
+- [websocket-client](https://github.com/websocket-client/websocket-client) (Apache License 2.0)
+- [markdown](https://github.com/Python-Markdown/markdown) (BSD License)
+- [openpyxl](https://openpyxl.readthedocs.io/en/stable/) (MIT License)
+- [filehandler](https://gitee.com/chen-shuhan-1/filehandler/blob/master/LICENSE) (Apache License 2.0)
+
+## 其他使用的代码
+
+- [sparkAPI](https://www.xfyun.cn/doc/spark/Web.html#_3-%E8%B0%83%E7%94%A8%E7%A4%BA%E4%BE%8B)：这段代码是讯飞星火的demo代码，用于调用讯飞的星火接口，实现对话生成。代码来源于讯飞星火ai大模型。该代码没有明确的开源许可证。[下载链接](https://openres.xfyun.cn/xfyundoc/2024-11-04/aaca671b-706e-4dee-80a7-508de2399604/1730728540026/sparkAPI.zip)
