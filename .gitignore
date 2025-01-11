@@ -1,6 +1,2 @@
-data/passwd_file.txt
-data/*.reward
-interdoction/*.html
-!interdoction/index.html
+data
 __pycache__
-__pycache__/*
