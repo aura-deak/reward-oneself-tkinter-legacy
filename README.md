@@ -25,6 +25,7 @@
 - [markdown](https://github.com/Python-Markdown/markdown) (BSD License)
 - [openpyxl](https://openpyxl.readthedocs.io/en/stable/) (MIT License)
 - [filehandler](https://gitee.com/chen-shuhan-1/filehandler/blob/master/LICENSE) (Apache License 2.0)
+- [requests](https://pypi.org/project/requests/) (Apache License 2.0)
 
 ## 其他使用的代码
 
