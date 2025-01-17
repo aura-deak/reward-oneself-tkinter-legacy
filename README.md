@@ -29,3 +29,8 @@
 ## 其他使用的代码
 
 - [sparkAPI](https://www.xfyun.cn/doc/spark/Web.html#_3-%E8%B0%83%E7%94%A8%E7%A4%BA%E4%BE%8B)：这段代码是讯飞星火的demo代码，用于调用讯飞的星火接口，实现对话生成。代码来源于讯飞星火ai大模型。该代码没有明确的开源许可证。[下载链接](https://openres.xfyun.cn/xfyundoc/2024-11-04/aaca671b-706e-4dee-80a7-508de2399604/1730728540026/sparkAPI.zip)
+
+## 调用的服务
+
+* [星火大模型API](https://xinghuo.xfyun.cn/sparkapi)
+* [一言](https://hitokoto.cn/)
