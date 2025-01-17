@@ -276,10 +276,10 @@ complete_task_button.place(x=400,y=500,width=400)
 reset_button = tkinter.ttk.Button(root, text="重置", command=reset)
 reset_button.place(x=0,y=550)
 
-view_introduction_button = tkinter.ttk.Button(root, text="查看说明", command=lambda: webbrowser.open("https://gitee.com/chen-shuhan-1/Intelligent-task-management-system/blob/master/README.md"))
+view_introduction_button = tkinter.ttk.Button(root, text="查看说明", command=lambda: webbrowser.open("https://gitee.com/chen-shuhan-1/reward-oneself/blob/master/README.md"))
 view_introduction_button.place(x=710,y=550)
 
-check_for_update_button = tkinter.ttk.Button(root, text="检查更新", command=lambda: webbrowser.open("https://gitee.com/chen-shuhan-1/Intelligent-task-management-system/releases"))
+check_for_update_button = tkinter.ttk.Button(root, text="检查更新", command=lambda: webbrowser.open("https://gitee.com/chen-shuhan-1/reward-oneself/releases"))
 check_for_update_button.place(x=0,y=600)
 
 report_button = tkinter.ttk.Button(root, text="生成报告", command=ai.make_report)
