@@ -11,7 +11,15 @@ class FileHandler:
         return f"{self.dir}/{self.file_name}"
 
     def check(self):
-        return os.path.exists(self.path())
+        dir = self.path().split("/")[-2]
+        print(dir)
+        if not os.path.exists(dir):
+            print(f"目录 {self.dir}/{dir} 不存在，创建目录")
+            os.makedirs(self.dir+"/"+dir)
+        if not os.path.exists(self.path()):
+            return False
+        else:
+            return True
         
     def overwrite(self,content):
         with open(self.path(),encoding="utf-8",mode="w") as d:
@@ -32,4 +40,4 @@ class FileHandler:
             del self
         else:
             raise FileNotFoundError(f"文件 {self.path()} 不存在")
-
+            
