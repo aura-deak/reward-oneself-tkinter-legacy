@@ -12,9 +12,7 @@ class FileHandler:
 
     def check(self):
         dir = self.path().split("/")[-2]
-        print(dir)
         if not os.path.exists(dir):
-            print(f"目录 {self.dir}/{dir} 不存在，创建目录")
             os.makedirs(self.dir+"/"+dir)
         if not os.path.exists(self.path()):
             return False

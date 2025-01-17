@@ -10,14 +10,13 @@ import random
 import webbrowser
 from datetime import datetime
 from filehandler import FileHandler
-import ai_report
+import ai
+import get_api
+import sparkAPI
+import hitokoto
 
-index_html = FileHandler("interdoction/index.html")
 report = FileHandler("interdoction/report.html")
-daily_report = FileHandler("日报生成.py")
 datafile = FileHandler("data/data.reward")
-tasks_file = FileHandler("static_resources/tasks.txt")
-one = FileHandler("static_resources/一言.txt")
 
 def askstring(title, prompt):
     while True:
@@ -84,7 +83,6 @@ class Tasks():
         self.repetition_list_of_tasks = eval(datafile.read())["repetition_list_of_tasks"]
         self.tasks_effort_count = eval(datafile.read())["tasks_effort_count"]
         self.effort_experience = eval(datafile.read())["effort_experience"]
-        self.predefined_tasks = eval(tasks_file.read())
     def get_keys(self):
         return self.tasks.keys()
     def get_value(self,key):
@@ -98,33 +96,28 @@ class Tasks():
         value = askinteger("添加任务","请输入任务分数")
         if key in self.tasks:
             messagebox.showwarning("添加任务",f"{key}已存在")
-        elif key in self.predefined_tasks:
-            print(self.predefined_tasks[key])
-            property = eval(str(self.predefined_tasks[key]))["property"]
-            repetition = eval(str(self.predefined_tasks[key]))["repetition"]
-            if messagebox.askyesno("添加任务",f"智能匹配到任务{key}，是否采用？\n优先级为{property}，是否重复为{repetition}"):
-                self.tasks[key] = value
-                self.priority_list_of_tasks[key] = property
-                self.repetition_list_of_tasks[key] = repetition
-                self.tasks_effort_count[key] = 0
-                self.effort_experience[key] = []
-                fresh_and_save()
-            else:
-                property = askinteger("添加任务","请输入任务优先级（1-3）",max=3,min=1)
-                repetition = messagebox.askyesno("添加任务","是否为重复任务")
-                self.tasks[key] = value
-                self.priority_list_of_tasks[key] = property
-                self.repetition_list_of_tasks[key] = repetition
-                self.tasks_effort_count[key] = 0
-                self.effort_experience[key] = []
-                fresh_and_save()
         else:
-            property = askinteger("添加任务","请输入任务优先级（1-3）",max=3,min=1)
-            repetition = messagebox.askyesno("添加任务","是否为重复任务")
+            query = f"任务名：{key}，请为该任务添加优先级和是否重复，优先级从高到低为3,2,1。是否重复为True或False，True为长期性、重复性任务、False为短期、一次性任务。使用{{'priority':优先级,'repetition':是否重复}}格式回答"
+            while True:
+                answer = ai.ai(query)
+                try:
+                    answer = eval(answer)
+                    priority = answer["priority"]
+                    repetition = answer["repetition"]
+                except:
+                    continue
+                else:
+                    break
+            if not messagebox.askyesno("是否使用智能匹配？", f"是否使用智能匹配？匹配到的优先级为{priority}，重复为{repetition}"):
+                priority = askinteger("添加任务","请输入任务优先级（1-3）",max=3,min=1)
+                repetition = messagebox.askyesno("添加任务","是否为重复任务")
             self.tasks[key] = value
-            self.priority_list_of_tasks[key] = property
+            self.priority_list_of_tasks[key] = priority
             self.repetition_list_of_tasks[key] = repetition
+            self.tasks_effort_count[key] = 0
+            self.effort_experience[key] = []
             fresh_and_save()
+
     def complete(self):
         global point
         key = askstring("完成任务","请输入任务名称")
@@ -135,7 +128,7 @@ class Tasks():
                 self.effort_experience[key].append(askstring("完成任务","请输入心得体会"))
             else:
                 self.delete(key)
-                print("完成任务",f"{key}没有重复，已删除")
+                messagebox.showinfo("完成任务",f"{key}没有重复，已删除")
             messagebox.showinfo("完成任务",f"完成{key}成功")
             fresh_and_save()
         else:
@@ -205,11 +198,10 @@ class PointDisplayer():
         global point
         self.text_widget.config(state=tkinter.NORMAL)
         self.text_widget.delete("1.0", tkinter.END)
-        self.text_widget.insert("insert", f"当前分数为{point}\n{random.choice(one.read().splitlines())}")
+        self.text_widget.insert("insert", f"当前分数为{point}\n{hitokoto.get_hitokoto()}")
         self.text_widget.tag_configure("center", justify='center',font=self.my_font)
         self.text_widget.tag_add("center", "1.0", "end")
         self.text_widget.config(state=tkinter.DISABLED)
-        print(f"当前分数为{point} \n {random.choice(one.read().splitlines())}")
 class Table():
     def __init__(self,root,columns,place,data):
         self.data = data
@@ -255,6 +247,10 @@ except FileNotFoundError:
     messagebox.showinfo("提示","数据文件不存在，已创建新的数据文件。请重新运行程序。")
     sys.exit()
 
+api = FileHandler("data/api.txt")
+if not api.check():
+    get_api.get_api_credentials()
+
 reward = Rewards()
 task = Tasks()
 
@@ -286,7 +282,7 @@ view_introduction_button.place(x=710,y=550)
 check_for_update_button = tkinter.ttk.Button(root, text="检查更新", command=lambda: webbrowser.open("https://gitee.com/chen-shuhan-1/Intelligent-task-management-system/releases"))
 check_for_update_button.place(x=0,y=600)
 
-report_button = tkinter.ttk.Button(root, text="生成报告", command=ai_report.main)
+report_button = tkinter.ttk.Button(root, text="生成报告", command=ai.make_report)
 report_button.place(x=710,y=600)
 
 root.mainloop()

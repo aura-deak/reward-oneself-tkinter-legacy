@@ -24,7 +24,14 @@ def select_version(root):
             "Max-32K版本": "max-32k",
             "4.0 Ultra版本": "4.0Ultra"
         }
-
+        url = {
+            "lite": "wss://spark-api.xf-yun.com/v1.1/chat",
+            "generalv3": "wss://spark-api.xf-yun.com/v3.1/chat",
+            "pro-128k": "wss://spark-api.xf-yun.com/chat/pro-128k",
+            "generalv3.5": "wss://spark-api.xf-yun.com/v3.5/chat",
+            "max-32k": "wss://spark-api.xf-yun.com/chat/max-32k",
+            "4.0Ultra": "wss://spark-api.xf-yun.com/v4.0/chat"
+        }
         version = tk.StringVar()
         version.set("lite")  # Set default value
 
@@ -43,7 +50,7 @@ def select_version(root):
 
         root.wait_window(version_window)
         #return versions[get_selected_version()]
-        return get_selected_version()
+        return get_selected_version(),url[get_selected_version()]
 
 
 def get_api_credentials():
@@ -53,9 +60,11 @@ def get_api_credentials():
     app_id = askstring("输入", "请输入您的APPID:")
     api_secret = askstring("输入", "请输入您的APISecret:")
     api_key = askstring("输入", "请输入您的APIKey:")
-    api.overwrite(f"{app_id}\n{api_secret}\n{api_key}\n{select_version(root)}")
+    domain_and_url = select_version(root)
+    domain = domain_and_url[0]
+    url = domain_and_url[1]
+    api.overwrite(f"{app_id}\n{api_secret}\n{api_key}\n{domain}\n{url}")
     messagebox.showinfo("提示", "API凭据已保存")
 
 if __name__ == "__main__":
     value = get_api_credentials()
-    print(value)

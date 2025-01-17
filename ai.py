@@ -8,16 +8,18 @@ from tkinter import messagebox
 import webbrowser
 import markdown
 
-def main():
+def ai(query):
     api_file = FileHandler("data/api.txt")
-    report_template = FileHandler("static_resources/template.html")
-    report_file = FileHandler("data/report.html")
-
     if not api_file.check():
         get_api.get_api_credentials()
 
     api = api_file.read()
-    appid, api_secret, api_key, domain = api.split('\n')
+    appid, api_secret, api_key, domain, Spark_url = api.split('\n')
+    return sparkAPI.main(appid, api_secret, api_key, Spark_url, domain, query)
+
+def make_report():
+    report_template = FileHandler("static_resources/template.html")
+    report_file = FileHandler("data/report.html")
 
     data_file = FileHandler("data/data.reward")
     if data_file.check():
@@ -38,30 +40,17 @@ tasks为《完成任务能够得到的积分》，rewards为《兑换奖励所�
         messagebox.showinfo("提示", "当前没有应用的使用数据")
         sys.exit()
 
-    if domain == "lite":
-        Spark_url = "ws://spark-api.xf-yun.com/v1.1/chat"
-    elif domain == "4.0Ultra":
-        Spark_url = "wss://spark-api.xf-yun.com/v4.0/chat"
-    elif domain == "max-32k":
-        Spark_url = "wss://spark-api.xf-yun.com/chat/max-32k"
-    elif domain == "generalv3.5":
-        Spark_url = "wss://spark-api.xf-yun.com/v3.5/chat"
-    elif domain == "pro-128k":
-        Spark_url = "wss://spark-api.xf-yun.com/chat/pro-128k"
-    elif domain == "generalv3":
-        Spark_url = "wss://spark-api.xf-yun.com/v3.1/chat"
     while True:
-        answer = sparkAPI.main(appid, api_secret, api_key, Spark_url, domain, query)
+        answer = ai(query)
         if not "[" in answer and "#" in answer:
             break
     answer = markdown.markdown(answer)
     report = report_template.read().format(content=answer, time=datetime.now().strftime("%Y-%m-%d %H:%M"))
-    print(report)
     report_file.overwrite(report)
     messagebox.showinfo("提示", "阶段报告生成成功")
     webbrowser.open(report_file.path())
 
 if __name__ == "__main__":
-    main()
+    make_report()
     
 
