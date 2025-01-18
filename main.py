@@ -38,6 +38,34 @@ def askinteger(title, prompt,max=float('inf'), min=0):
             break
     return answer
 
+def create_subwindow(items):
+    # 创建子窗口
+    subwindow = tkinter.Toplevel(root)
+    subwindow.title("子窗口")
+    
+    # 计算窗口高度
+    window_height = 50 + 30 * len(items)  # 每个项目占用30像素，加上标题栏的50像素
+    subwindow.geometry(f"300x{window_height}")
+    
+    # 创建StringVar对象来存储选中的值
+    selected_value = tkinter.StringVar()
+    
+    # 创建单选按钮
+    for i, item in enumerate(items):
+        radiobutton = ttk.Radiobutton(subwindow, text=item, variable=selected_value, value=item)
+        radiobutton.grid(row=i, column=0, padx=10, pady=5, sticky="w")
+    
+    # 提交按钮
+    def submit():
+        global value
+        value = selected_value.get()
+        subwindow.destroy()
+    
+    submit_button = ttk.Button(subwindow, text="提交", command=submit)
+    submit_button.grid(row=len(items), column=0, columnspan=2, pady=10)
+    subwindow.wait_window()
+    return value
+
 def fresh_and_save():
 
     displayer.update()
@@ -120,27 +148,24 @@ class Tasks():
 
     def complete(self):
         global point
-        key = askstring("完成任务","请输入任务名称")
-        if key in self.tasks:
-            if self.repetition_list_of_tasks[key]:
-                point += self.tasks[key]
-                self.tasks_effort_count[key] += 1
-                self.effort_experience[key].append(askstring("完成任务","请输入心得体会"))
-            else:
-                self.delete(key)
-                messagebox.showinfo("完成任务",f"{key}没有重复，已删除")
-            messagebox.showinfo("完成任务",f"完成{key}成功")
-            fresh_and_save()
-        else:
-            messagebox.showwarning("完成任务",f"{key}不存在")
-    def delete(self, key =""):
+        key = create_subwindow(self.get_keys())
+        self.tasks_effort_count[key] += 1
+        self.effort_experience[key].append(askstring("完成任务","请输入心得体会"))
+        point += self.tasks[key]
+        if not self.repetition_list_of_tasks[key]:
+            self.delete(key, showinfo=False)
+            messagebox.showinfo("完成任务",f"{key}没有重复，已删除")
+        messagebox.showinfo("完成任务",f"完成{key}成功")
+        fresh_and_save()
+    def delete(self, key ="", showinfo = True):
         if key == "":
-            key = askstring("删除任务","请输入任务名称")
+            key = create_subwindow(self.get_keys())
         if key in self.tasks:
             del self.tasks[key]
             del self.priority_list_of_tasks[key]
             del self.repetition_list_of_tasks[key]
-            messagebox.showinfo("删除任务",f"删除{key}成功")
+            if showinfo:
+                messagebox.showinfo("删除任务",f"删除{key}成功")
             fresh_and_save()
         else:
             messagebox.showwarning("删除任务",f"{key}不存在")
@@ -166,26 +191,21 @@ class Rewards():
             fresh_and_save()
     def complete(self):
         global point
-        key = askstring("兑换奖励","请输入奖励名称")
-        if key in self.rewards:
-            if point >= self.rewards[key]:
-                point -= self.rewards[key]
-                messagebox.showinfo("兑换奖励",f"兑换{key}成功")
-                self.reward_count[key] += 1
-                self.reward_experience[key].append(askstring("兑换奖励","请输入心得体会"))
-                fresh_and_save()
-            else:
-                messagebox.showwarning("兑换奖励",f"兑换{key}失败，积分不足")
-        else:
-            messagebox.showwarning("兑换奖励",f"{key}不存在")
-    def delete(self):
-        key = askstring("删除奖励","请输入奖励名称")
-        if key in self.rewards:
-            del self.rewards[key]
-            messagebox.showinfo("删除奖励",f"删除{key}成功")
+        key = create_subwindow(self.get_keys())
+        if point >= self.rewards[key]:
+            point -= self.rewards[key]
+            messagebox.showinfo("兑换奖励",f"兑换{key}成功")
+            self.reward_count[key] += 1
+            self.reward_experience[key].append(askstring("兑换奖励","请输入心得体会"))
             fresh_and_save()
         else:
-            messagebox.showwarning("删除奖励",f"{key}不存在")
+            messagebox.showwarning("兑换奖励",f"兑换{key}失败，积分不足")
+    def delete(self):
+        key = create_subwindow(self.get_keys())
+        del self.rewards[key]
+        messagebox.showinfo("删除奖励",f"删除{key}成功")
+        fresh_and_save()
+
 class PointDisplayer():
     def __init__(self, root):
         self.text_widget = tkinter.Text(root, relief=FLAT)
