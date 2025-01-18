@@ -1,9 +1,9 @@
 # 该程序由通义灵码生成，用于获取一言（hitokoto）的数据
 
 import requests
+from filehandler import FileHandler
 
-def get_hitokoto():
-    url = "https://v1.hitokoto.cn/?c=d&c=i&c=k&encode=text"
+def get_hitokoto(url):
     response = requests.get(url)
     if response.status_code == 200:
         return response.text

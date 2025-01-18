@@ -19,15 +19,18 @@ report = FileHandler("interdoction/report.html")
 datafile = FileHandler("data/data.reward")
 
 def askstring(title, prompt, allow_empty=False):
+    root.withdraw()
     while True:
         answer = simpledialog.askstring(title, prompt)
         if answer is None or answer == "" and not allow_empty:
             messagebox.showerror("错误", "输入不能为空")
         else:
-            break     
+            break
+    root.deiconify()     
     return answer
 
 def askinteger(title, prompt,max=float('inf'), min=0):
+    root.withdraw()
     while True:
         answer = simpledialog.askinteger(title, prompt)
         if answer is None:
@@ -36,16 +39,18 @@ def askinteger(title, prompt,max=float('inf'), min=0):
             messagebox.showerror("错误", f"输入必须在{min}和{max}之间")
         else:
             break
+    root.deiconify() 
     return answer
 
-def create_subwindow(items,name="子窗口"):
+def create_subwindow(items,name="子窗口",allow_cancel=True):
     # 创建子窗口
     subwindow = tkinter.Toplevel(root)
     subwindow.title(name)
-    
+    subwindow.attributes('-topmost', 'true')
     # 计算窗口高度
     window_height = 50 + 30 * len(items)  # 每个项目占用30像素，加上标题栏的50像素
     subwindow.geometry(f"300x{window_height}")
+
     
     # 创建StringVar对象来存储选中的值
     selected_value = tkinter.StringVar()
@@ -57,6 +62,9 @@ def create_subwindow(items,name="子窗口"):
     
     # 提交按钮
     def submit():
+        if selected_value.get() == "" and not allow_cancel:
+            messagebox.showerror("错误", "请选择一个选项",parent=subwindow)
+            return
         global value
         value = selected_value.get()
         subwindow.destroy()
@@ -67,12 +75,44 @@ def create_subwindow(items,name="子窗口"):
     
     submit_button = ttk.Button(subwindow, text="提交", command=submit)
     submit_button.grid(row=len(items), column=0, columnspan=2, pady=10)
-    cancel_button = ttk.Button(subwindow, text="取消", command=cancel)
-    cancel_button.grid(row=len(items), column=3, columnspan=2, pady=10)
+    if allow_cancel:
+        cancel_button = ttk.Button(subwindow, text="取消", command=cancel)
+        cancel_button.grid(row=len(items), column=3, columnspan=2, pady=10)
     subwindow.wait_window()
     return value
 
+def create_multiple_subwindow(items,name="子窗口",allow_cancel=True):
+    subwindow = tkinter.Toplevel(root)
+    subwindow.title(name)
+    subwindow.attributes('-topmost', 'true')
+    values = {}
+    for i, item in enumerate(items):
+        values[item] = tkinter.IntVar()
+    for i, item in enumerate(items):
+        checkbox = tkinter.Checkbutton(subwindow, text=item,variable=values[item], onvalue=1, offvalue=0)
+        checkbox.grid(row=i, column=0, padx=10, pady=5, sticky="w")
+    def submit():
+        global value
+        value = []
+        for i in values.keys():
+            if values[i].get() == 1:
+                value.append(i)
+        if len(value) == 0 and not allow_cancel:
+            messagebox.showerror("错误", "请选择一个选项",parent=subwindow)
+            return
+        subwindow.destroy()
+    def cancel():
+        subwindow.destroy()
+        return
 
+    submit_button = ttk.Button(subwindow, text="提交", command=submit)
+    submit_button.grid(row=len(items), column=0, columnspan=2, pady=10)
+    if allow_cancel:
+        cancel_button = ttk.Button(subwindow, text="取消", command=cancel)
+        cancel_button.grid(row=len(items), column=3, columnspan=2, pady=10)
+    subwindow.wait_window()
+    return value
+    
 
 def fresh_and_save():
 
@@ -89,12 +129,18 @@ def fresh_and_save():
         'reward_count' : reward.reward_count,
         'tasks_effort_count' : task.tasks_effort_count,
         'effort_experience' : task.effort_experience,
-        'reward_experience' : reward.reward_experience
+        'reward_experience' : reward.reward_experience,
+        'hitokoto_url' : hitokoto_url
     }
     datafile.overwrite(str(data))
     
-def reset():
-    if messagebox.askyesno("是否重置？", "是否重置？该操作不可撤销！", icon=messagebox.WARNING):
+def reset(showinfo = True):
+    if showinfo:
+        condition = messagebox.askyesno("是否重置？", "是否重置？该操作不可撤销！", icon=messagebox.WARNING)
+    else:
+        condition = True
+
+    if condition:
         data = {
             'tasks': {'阅读': 5},
             'rewards': {'喝奶茶': 1},
@@ -104,13 +150,26 @@ def reset():
             'tasks_effort_count' : {"阅读":0},
             'reward_count' : {"喝奶茶":0},
             'effort_experience' : {"阅读":[]},
-            'reward_experience' : {"喝奶茶":[]}
+            'reward_experience' : {"喝奶茶":[]},
+            'hitokoto_url' : "https://v1.hitokoto.cn/?c=d&c=i&c=k&encode=text"
         }
         datafile.overwrite(str(data))
         messagebox.showinfo("重置成功","重置成功，请重启程序")
         sys.exit()
     else:
         messagebox.showinfo("重置取消","已取消")
+
+def change_hitokoto_url():
+    global hitokoto_url
+    c = {"动画": "c=a&","漫画": "c=b&","游戏": "c=c&","文学": "c=d&","原创": "c=e&","来自网络": "c=f&","其他": "c=g&","影视": "c=h&","诗词": "c=i&","网易云": "c=j&","哲学": "c=k&","抖机灵": "c=l&"}
+    answer = create_multiple_subwindow(c.keys(),name="更改名言喜好",allow_cancel=False)
+
+    global hitokoto_url
+    hitokoto_url = "https://v1.hitokoto.cn/?"
+    for value in answer:
+        hitokoto_url += c[value]
+    hitokoto_url += "encode=text"
+    fresh_and_save()
 
 class Tasks():
     def __init__(self):
@@ -145,7 +204,7 @@ class Tasks():
                 else:
                     break
             if not messagebox.askyesno("是否使用智能匹配？", f"是否使用智能匹配？匹配到的优先级为{priority}，重复为{repetition}"):
-                priority = askinteger("添加任务","请输入任务优先级（1-3）",max=3,min=1)
+                priority = create_subwindow([1,2,3],name="添加任务优先级",allow_cancel=False)
                 repetition = messagebox.askyesno("添加任务","是否为重复任务")
             self.tasks[key] = value
             self.priority_list_of_tasks[key] = priority
@@ -158,7 +217,7 @@ class Tasks():
         global point
         key = create_subwindow(self.get_keys(),name="完成任务")
         if key == "":
-            return 0
+            return
         self.tasks_effort_count[key] += 1
         self.effort_experience[key].append(askstring("完成任务","请输入心得体会",allow_empty=True))
         point += self.tasks[key]
@@ -171,7 +230,7 @@ class Tasks():
         if key == "":
             key = create_subwindow(self.get_keys(),name="删除任务")
             if key == "":
-                return 0
+                return
         if key in self.tasks:
             del self.tasks[key]
             del self.priority_list_of_tasks[key]
@@ -205,7 +264,7 @@ class Rewards():
         global point
         key = create_subwindow(self.get_keys(),name="兑换奖励")
         if key == "":
-            return 0
+            return
         if point >= self.rewards[key]:
             point -= self.rewards[key]
             messagebox.showinfo("兑换奖励",f"兑换{key}成功")
@@ -217,7 +276,7 @@ class Rewards():
     def delete(self):
         key = create_subwindow(self.get_keys(),name="删除奖励")
         if key == "":
-            return 0
+            return
         del self.rewards[key]
         messagebox.showinfo("删除奖励",f"删除{key}成功")
         fresh_and_save()
@@ -234,7 +293,7 @@ class PointDisplayer():
         global point
         self.text_widget.config(state=tkinter.NORMAL)
         self.text_widget.delete("1.0", tkinter.END)
-        self.text_widget.insert("insert", f"当前分数为{point}\n{hitokoto.get_hitokoto()}")
+        self.text_widget.insert("insert", f"当前分数为{point}\n{hitokoto.get_hitokoto(hitokoto_url)}")
         self.text_widget.tag_configure("center", justify='center',font=self.my_font)
         self.text_widget.tag_add("center", "1.0", "end")
         self.text_widget.config(state=tkinter.DISABLED)
@@ -268,24 +327,15 @@ try:
     data = eval(datafile.read())
     point = data["point"]
 except FileNotFoundError:
-    data = {
-        'tasks': {'阅读': 5},
-        'rewards': {'喝奶茶': 1},
-        'point': 0,
-        'priority_list_of_tasks': {'阅读': 2},
-        'repetition_list_of_tasks': {'阅读': True},
-        'tasks_effort_count' : {"阅读":0},
-        'reward_count' : {"喝奶茶":0},
-        'effort_experience' : {"阅读":[]},
-        'reward_experience' : {"喝奶茶":[]}
-    }
-    datafile.overwrite(str(data))
-    messagebox.showinfo("提示","数据文件不存在，已创建新的数据文件。请重新运行程序。")
+    reset(showinfo=False)
     sys.exit()
+
+hitokoto_url = data["hitokoto_url"]
 
 api = FileHandler("data/api.txt")
 if not api.check():
     get_api.get_api_credentials()
+
 
 reward = Rewards()
 task = Tasks()
@@ -315,8 +365,8 @@ reset_button.place(x=0,y=550)
 view_introduction_button = tkinter.ttk.Button(root, text="查看说明", command=lambda: webbrowser.open("https://gitee.com/chen-shuhan-1/reward-oneself/blob/master/README.md"))
 view_introduction_button.place(x=710,y=550)
 
-check_for_update_button = tkinter.ttk.Button(root, text="检查更新", command=lambda: webbrowser.open("https://gitee.com/chen-shuhan-1/reward-oneself/releases"))
-check_for_update_button.place(x=0,y=600)
+change_hitokoto_url_button = tkinter.ttk.Button(root, text="更改名言喜好", command=change_hitokoto_url)
+change_hitokoto_url_button.place(x=0,y=600)
 
 report_button = tkinter.ttk.Button(root, text="生成报告", command=ai.make_report)
 report_button.place(x=710,y=600)
