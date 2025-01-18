@@ -18,10 +18,10 @@ import hitokoto
 report = FileHandler("interdoction/report.html")
 datafile = FileHandler("data/data.reward")
 
-def askstring(title, prompt):
+def askstring(title, prompt, allow_empty=False):
     while True:
         answer = simpledialog.askstring(title, prompt)
-        if answer is None or answer == "":
+        if answer is None or answer == "" and not allow_empty:
             messagebox.showerror("错误", "输入不能为空")
         else:
             break     
@@ -38,10 +38,10 @@ def askinteger(title, prompt,max=float('inf'), min=0):
             break
     return answer
 
-def create_subwindow(items):
+def create_subwindow(items,name="子窗口"):
     # 创建子窗口
     subwindow = tkinter.Toplevel(root)
-    subwindow.title("子窗口")
+    subwindow.title(name)
     
     # 计算窗口高度
     window_height = 50 + 30 * len(items)  # 每个项目占用30像素，加上标题栏的50像素
@@ -60,11 +60,19 @@ def create_subwindow(items):
         global value
         value = selected_value.get()
         subwindow.destroy()
+    def cancel():
+        global value
+        value = ""
+        subwindow.destroy()
     
     submit_button = ttk.Button(subwindow, text="提交", command=submit)
     submit_button.grid(row=len(items), column=0, columnspan=2, pady=10)
+    cancel_button = ttk.Button(subwindow, text="取消", command=cancel)
+    cancel_button.grid(row=len(items), column=3, columnspan=2, pady=10)
     subwindow.wait_window()
     return value
+
+
 
 def fresh_and_save():
 
@@ -148,9 +156,11 @@ class Tasks():
 
     def complete(self):
         global point
-        key = create_subwindow(self.get_keys())
+        key = create_subwindow(self.get_keys(),name="完成任务")
+        if key == "":
+            return 0
         self.tasks_effort_count[key] += 1
-        self.effort_experience[key].append(askstring("完成任务","请输入心得体会"))
+        self.effort_experience[key].append(askstring("完成任务","请输入心得体会",allow_empty=True))
         point += self.tasks[key]
         if not self.repetition_list_of_tasks[key]:
             self.delete(key, showinfo=False)
@@ -159,7 +169,9 @@ class Tasks():
         fresh_and_save()
     def delete(self, key ="", showinfo = True):
         if key == "":
-            key = create_subwindow(self.get_keys())
+            key = create_subwindow(self.get_keys(),name="删除任务")
+            if key == "":
+                return 0
         if key in self.tasks:
             del self.tasks[key]
             del self.priority_list_of_tasks[key]
@@ -191,17 +203,21 @@ class Rewards():
             fresh_and_save()
     def complete(self):
         global point
-        key = create_subwindow(self.get_keys())
+        key = create_subwindow(self.get_keys(),name="兑换奖励")
+        if key == "":
+            return 0
         if point >= self.rewards[key]:
             point -= self.rewards[key]
             messagebox.showinfo("兑换奖励",f"兑换{key}成功")
             self.reward_count[key] += 1
-            self.reward_experience[key].append(askstring("兑换奖励","请输入心得体会"))
+            self.reward_experience[key].append(askstring("兑换奖励","请输入心得体会",allow_empty=True))
             fresh_and_save()
         else:
             messagebox.showwarning("兑换奖励",f"兑换{key}失败，积分不足")
     def delete(self):
-        key = create_subwindow(self.get_keys())
+        key = create_subwindow(self.get_keys(),name="删除奖励")
+        if key == "":
+            return 0
         del self.rewards[key]
         messagebox.showinfo("删除奖励",f"删除{key}成功")
         fresh_and_save()
