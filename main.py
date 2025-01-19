@@ -9,6 +9,7 @@ import sys
 import random
 import webbrowser
 from datetime import datetime
+import math
 from filehandler import FileHandler
 import ai
 import get_api
@@ -42,14 +43,14 @@ def askinteger(title, prompt,max=float('inf'), min=0):
     root.deiconify() 
     return answer
 
-def create_subwindow(items,name="子窗口",allow_cancel=True):
+def create_subwindow(items=None,dictionary=None,name="子窗口",allow_cancel=True):
     # 创建子窗口
     subwindow = tkinter.Toplevel(root)
     subwindow.title(name)
     subwindow.attributes('-topmost', 'true')
-    # 计算窗口高度
-    window_height = 50 + 30 * len(items)  # 每个项目占用30像素，加上标题栏的50像素
-    subwindow.geometry(f"300x{window_height}")
+
+    if items == None:
+        items = list(dictionary.keys())
 
     
     # 创建StringVar对象来存储选中的值
@@ -79,13 +80,20 @@ def create_subwindow(items,name="子窗口",allow_cancel=True):
         cancel_button = ttk.Button(subwindow, text="取消", command=cancel)
         cancel_button.grid(row=len(items), column=3, columnspan=2, pady=10)
     subwindow.wait_window()
-    return value
+    if dictionary is None:
+        return value
+    else:
+        return dictionary[value]
 
-def create_multiple_subwindow(items,name="子窗口",allow_cancel=True):
+def create_multiple_subwindow(items=None,dictionary=None,name="子窗口",allow_cancel=True):
     subwindow = tkinter.Toplevel(root)
     subwindow.title(name)
     subwindow.attributes('-topmost', 'true')
     values = {}
+
+    if items is None:
+        items = list(dictionary.keys())
+
     for i, item in enumerate(items):
         values[item] = tkinter.IntVar()
     for i, item in enumerate(items):
@@ -111,7 +119,13 @@ def create_multiple_subwindow(items,name="子窗口",allow_cancel=True):
         cancel_button = ttk.Button(subwindow, text="取消", command=cancel)
         cancel_button.grid(row=len(items), column=3, columnspan=2, pady=10)
     subwindow.wait_window()
-    return value
+    if dictionary is None:
+        return value
+    else:
+        list = []
+        for i in value:
+            list.append(dictionary[i])
+        return list
     
 
 def fresh_and_save():
@@ -129,6 +143,7 @@ def fresh_and_save():
         'reward_count' : reward.reward_count,
         'tasks_effort_count' : task.tasks_effort_count,
         'effort_experience' : task.effort_experience,
+        "tasks_time" : task.tasks_time,
         'reward_experience' : reward.reward_experience,
         'hitokoto_url' : hitokoto_url
     }
@@ -145,12 +160,13 @@ def reset(showinfo = True):
             'tasks': {'阅读': 5},
             'rewards': {'喝奶茶': 1},
             'point': 0,
-            'priority_list_of_tasks': {'阅读': 2},
+            'priority_list_of_tasks': {'阅读': 25},
             'repetition_list_of_tasks': {'阅读': True},
             'tasks_effort_count' : {"阅读":0},
             'reward_count' : {"喝奶茶":0},
             'effort_experience' : {"阅读":[]},
             'reward_experience' : {"喝奶茶":[]},
+            'tasks_time' : {"阅读":60},
             'hitokoto_url' : "https://v1.hitokoto.cn/?c=d&c=i&c=k&encode=text"
         }
         datafile.overwrite(str(data))
@@ -178,6 +194,7 @@ class Tasks():
         self.repetition_list_of_tasks = eval(datafile.read())["repetition_list_of_tasks"]
         self.tasks_effort_count = eval(datafile.read())["tasks_effort_count"]
         self.effort_experience = eval(datafile.read())["effort_experience"]
+        self.tasks_time = eval(datafile.read())["tasks_time"]
     def get_keys(self):
         return self.tasks.keys()
     def get_value(self,key):
@@ -186,28 +203,34 @@ class Tasks():
         return self.priority_list_of_tasks[key]
     def get_repetition(self,key):
         return self.repetition_list_of_tasks[key]
+    def get_task_time(self,key):
+        return self.tasks_time[key]
     def add(self):
         key = askstring("添加任务","请输入任务名称")
         value = askinteger("添加任务","请输入任务分数")
         if key in self.tasks:
             messagebox.showwarning("添加任务",f"{key}已存在")
         else:
-            query = f"任务名：{key}，请为该任务添加优先级和是否重复，优先级从高到低为3,2,1。是否重复为True或False，True为长期性、重复性任务、False为短期、一次性任务。使用{{'priority':优先级,'repetition':是否重复}}格式回答"
-            while True:
-                answer = ai.ai(query)
-                try:
-                    answer = eval(answer)
-                    priority = answer["priority"]
-                    repetition = answer["repetition"]
-                except:
-                    continue
-                else:
-                    break
-            if not messagebox.askyesno("是否使用智能匹配？", f"是否使用智能匹配？匹配到的优先级为{priority}，重复为{repetition}"):
-                priority = create_subwindow([1,2,3],name="添加任务优先级",allow_cancel=False)
-                repetition = messagebox.askyesno("添加任务","是否为重复任务")
+            repetition = messagebox.askyesno("添加任务","是否为重复任务")
+
+            importance_dictionary = {"不重要":1,"较重要":2,"重要":3,"很重要":4,"非常重要":float("inf")}
+            importance = create_subwindow(dictionary=importance_dictionary,name="添加任务重要性",allow_cancel=False)
+
+            urgency_dictionary = {"不紧急":1,"一般紧急":2,"紧急":3}
+            urgency = create_subwindow(dictionary=urgency_dictionary,name="添加任务紧急度",allow_cancel=False)
+
+            value_dictionary = {"低价值":1,"中价值":2,"高价值":3}
+            value = create_subwindow(dictionary=value_dictionary,name="添加任务价值",allow_cancel=False)
+
+            time = askinteger("添加任务","请输入任务时间")
+            priority = 4*importance + 2*urgency + 3*value + (1/time)
+            if priority == float("inf"):
+                priority = "inf"
+            else:
+                priority = round(priority)
             self.tasks[key] = value
             self.priority_list_of_tasks[key] = priority
+            self.tasks_time[key] = time
             self.repetition_list_of_tasks[key] = repetition
             self.tasks_effort_count[key] = 0
             self.effort_experience[key] = []
@@ -235,6 +258,7 @@ class Tasks():
             del self.tasks[key]
             del self.priority_list_of_tasks[key]
             del self.repetition_list_of_tasks[key]
+            del self.tasks_time[key]
             if showinfo:
                 messagebox.showinfo("删除任务",f"删除{key}成功")
             fresh_and_save()
@@ -308,14 +332,21 @@ class Table():
         self.tree.place(x=place[0],y=place[1],width=400,height=350)
     def update(self):
         self.tree.delete(*self.tree.get_children())
-        for key in self.data.get_keys():
-            if len(self.columns) == 2:
+        count = 0
+        if len(self.columns) == 2:
+            for key in self.data.get_keys():
                 self.tree.insert("", "end", values=(key,self.data.get_value(key)))
-            else:
-                self.tree.insert("", "end", values=(key,self.data.get_value(key), self.data.get_priority(key), self.data.get_repetition(key)))
+        else:
+            dictionary = {}
+            for i in self.data.get_keys():
+                priority = self.data.get_priority(i)
+                dictionary[i] = float("inf") if priority == "inf" else priority
+            sorted_items = sorted(dictionary.items(), key=lambda item: item[1], reverse=True)
+            lst = [item[0] for item in sorted_items]
+            for i in lst:
+                self.tree.insert("", "end", values=(i,self.data.get_value(i),self.data.get_priority(i),self.data.get_task_time(i),self.data.get_repetition(i)))
 
-
-
+            
 
 
 root = tkinter.Tk()
@@ -342,7 +373,7 @@ task = Tasks()
 
 displayer = PointDisplayer(root)
 rewards_table = Table(root,("奖励项","分值"),(0,50),reward)
-tasks_table = Table(root,("努力项","分值","优先级","重复"),(400,50),task)
+tasks_table = Table(root,("努力项","分值","优先级","时间","重复"),(400,50),task)
 fresh_and_save()
 
 add_reward_button = tkinter.ttk.Button(root, text="添加奖励", command=reward.add)
