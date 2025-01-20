@@ -223,7 +223,7 @@ class Tasks():
             value = create_subwindow(dictionary=value_dictionary,name="添加任务价值",allow_cancel=False)
 
             time = askinteger("添加任务","请输入任务时间")
-            priority = 4*importance + 2*urgency + 3*value + (1/time)
+            priority = 4*importance + 2*urgency + 3*value - time/10
             if priority == float("inf"):
                 priority = "inf"
             else:
