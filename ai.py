@@ -3,6 +3,7 @@ from filehandler import FileHandler
 import get_api
 from datetime import datetime
 import sys
+import json
 import tkinter as tk
 from tkinter import messagebox
 import webbrowser
@@ -21,9 +22,9 @@ def make_report():
     report_template = FileHandler("static_resources/template.html")
     report_file = FileHandler("data/report.html")
 
-    data_file = FileHandler("data/data.reward")
+    data_file = FileHandler("data/data.json")
     if data_file.check():
-        data = eval(data_file.read())
+        data = data_file.load()
         query = f"""
 你是报告生成助手，请帮助用户生成《奖励自己 阶段总结》，对用户进行鼓励、建议和规划。
 注意：平台本身不提供、兑换、奖励任何物质和虚拟产品，奖励由用户自己兑换，该工具只是帮助你统计和记录信息。请在报告中指明这一点。

@@ -9,7 +9,7 @@ import sys
 import random
 import webbrowser
 from datetime import datetime
-import math
+import json
 from filehandler import FileHandler
 import ai
 import get_api
@@ -17,7 +17,7 @@ import sparkAPI
 import hitokoto
 
 report = FileHandler("interdoction/report.html")
-datafile = FileHandler("data/data.reward")
+datafile = FileHandler("data/data.json")
 
 def askstring(title, prompt, allow_empty=False):
     root.withdraw()
@@ -147,7 +147,7 @@ def fresh_and_save():
         'reward_experience' : reward.reward_experience,
         'hitokoto_url' : hitokoto_url
     }
-    datafile.overwrite(str(data))
+    datafile.write_as_json(data)
     
 def reset(showinfo = True):
     if showinfo:
@@ -169,7 +169,7 @@ def reset(showinfo = True):
             'tasks_time' : {"阅读":60},
             'hitokoto_url' : "https://v1.hitokoto.cn/?c=d&c=i&c=k&encode=text"
         }
-        datafile.overwrite(str(data))
+        datafile.write_as_json(data)
         messagebox.showinfo("重置成功","重置成功，请重启程序")
         sys.exit()
     else:
@@ -189,12 +189,12 @@ def change_hitokoto_url():
 
 class Tasks():
     def __init__(self):
-        self.tasks = eval(datafile.read())["tasks"]
-        self.priority_list_of_tasks = eval(datafile.read())["priority_list_of_tasks"]
-        self.repetition_list_of_tasks = eval(datafile.read())["repetition_list_of_tasks"]
-        self.tasks_effort_count = eval(datafile.read())["tasks_effort_count"]
-        self.effort_experience = eval(datafile.read())["effort_experience"]
-        self.tasks_time = eval(datafile.read())["tasks_time"]
+        self.tasks = data["tasks"]
+        self.priority_list_of_tasks = data["priority_list_of_tasks"]
+        self.repetition_list_of_tasks = data["repetition_list_of_tasks"]
+        self.tasks_effort_count = data["tasks_effort_count"]
+        self.effort_experience = data["effort_experience"]
+        self.tasks_time = data["tasks_time"]
     def get_keys(self):
         return self.tasks.keys()
     def get_value(self,key):
@@ -267,9 +267,9 @@ class Tasks():
 
 class Rewards():
     def __init__(self):
-        self.rewards = eval(datafile.read())["rewards"]
-        self.reward_count = eval(datafile.read())["reward_count"]
-        self.reward_experience = eval(datafile.read())["reward_experience"]
+        self.rewards = data["rewards"]
+        self.reward_count = data["reward_count"]
+        self.reward_experience = data["reward_experience"]
     def get_keys(self):
         return self.rewards.keys()
     def get_value(self,key):
@@ -355,7 +355,7 @@ root.geometry("800x650")
 root.resizable(False, False)
 
 try:
-    data = eval(datafile.read())
+    data = datafile.load()
     point = data["point"]
 except FileNotFoundError:
     reset(showinfo=False)

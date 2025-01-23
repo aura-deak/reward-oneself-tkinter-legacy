@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import os
 import traceback
+import json
 
 class FileHandler:
     def __init__(self, file_name):
@@ -30,7 +31,15 @@ class FileHandler:
                 return d.read()
         else:
             raise FileNotFoundError(f"文件 {self.path()} 不存在")
-    
+    def load(self):
+        if self.check():
+            with open(self.path(), encoding="utf-8") as d:
+                return json.load(d)
+        else:
+            raise FileNotFoundError(f"文件 {self.path()} 不存在")
+    def write_as_json(self,data):
+        with open(self.path(),encoding="utf-8",mode="w") as d:
+            json.dump(data,d,ensure_ascii=False,indent=4)
     def delete(self):
         if self.check():
             os.remove(self.path())
