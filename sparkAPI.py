@@ -24,6 +24,20 @@ import websocket
 import openpyxl
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import os
+import sys
+import logging
+from logging.handlers import RotatingFileHandler  # 添加: 导入 RotatingFileHandler
+
+# 配置日志
+log_file = 'data/log/log.txt'
+os.makedirs(os.path.dirname(log_file), exist_ok=True)
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[RotatingFileHandler(log_file, maxBytes=10000, backupCount=5)]
+)
+
+log = logging.getLogger()
 
 
 class Ws_Param(object):
@@ -71,12 +85,13 @@ class Ws_Param(object):
 
 # 收到websocket错误的处理
 def on_error(ws, error):
-    print("### error:", error)
+    log.error(error)
+
 
 
 # 收到websocket关闭的处理
 def on_close(ws):
-    print("### closed ###")
+    log.info('close')
 
 
 # 收到websocket连接建立的处理
@@ -92,21 +107,17 @@ def run(ws, *args):
 # 收到websocket消息的处理
 def on_message(ws, message):
     global content
-    print(message)
     data = json.loads(message)
     code = data['header']['code']
     if code != 0:
-        print(f'请求错误: {code}, {data}')
+        log.error(f'请求错误: {code}, {data}')
         ws.close()
     else:
         choices = data["payload"]["choices"]
         status = choices["status"]
         content = content + choices["text"][0]["content"]
-        print(content,end='')
         if status == 2:
-            print("#### 关闭会话")
             ws.close()
-        
 
 
 def gen_params(appid, query, domain):
@@ -150,4 +161,3 @@ def main(appid, api_secret, api_key, Spark_url, domain, query):
     ws.domain = domain
     ws.run_forever(sslopt={"cert_reqs": ssl.CERT_NONE})
     return content
-
