@@ -88,6 +88,8 @@ def create_subwindow(items=None,dictionary=None,name="子窗口",allow_cancel=Tr
         return dictionary[value]
 
 def create_multiple_subwindow(items=None,dictionary=None,name="子窗口",allow_cancel=True):
+    global value
+    value = []
     subwindow = tkinter.Toplevel(root)
     subwindow.title(name)
     subwindow.attributes('-topmost', 'true')
@@ -110,13 +112,20 @@ def create_multiple_subwindow(items=None,dictionary=None,name="子窗口",allow_
         for i in values.keys():
             if values[i].get() == 1:
                 value.append(i)
-        if len(value) == 0 and not allow_cancel:
-            messagebox.showerror("错误", "请选择一个选项",parent=subwindow)
-            return
-        subwindow.destroy()
+                
+        # 修改判断逻辑
+        if len(value) == 0:
+            if not allow_cancel:
+                messagebox.showerror("错误", "请选择一个选项",parent=subwindow)
+                return  # 保持窗口打开
+            else:
+                value = []  # 显式设置为空列表
+                
+        subwindow.destroy()  # 仅在有效时关闭窗口
     def cancel():
+        global value
+        value = None
         subwindow.destroy()
-        return
 
     submit_button = ttk.Button(subwindow, text="提交", command=submit)
     submit_button.grid(row=len(items), column=0, columnspan=2, pady=10)
@@ -124,14 +133,12 @@ def create_multiple_subwindow(items=None,dictionary=None,name="子窗口",allow_
         cancel_button = ttk.Button(subwindow, text="取消", command=cancel)
         cancel_button.grid(row=len(items), column=3, columnspan=2, pady=10)
     subwindow.wait_window()
+    # 修改最终返回逻辑
     if dictionary is None:
-        return None
+        return value  # 直接返回列表
     else:
-        list = []
-        for i in value:
-            list.append(dictionary[i])
-        return list
-    
+        return [dictionary[i] for i in value]
+
 
 def fresh_and_save():
 
@@ -198,9 +205,14 @@ def change_hitokoto_url():
 def change_optional_features():
     global enable_ai
     optionals = create_multiple_subwindow(["启用AI"],name="更改功能",allow_cancel=True)
+    print(optionals)
     if optionals is not None:
         if "启用AI" in optionals:
             enable_ai = True
+            print("启用AI")
+        else:
+            enable_ai = False
+            print("禁用AI")
     fresh_and_save()
 def ai():
     if enable_ai:
