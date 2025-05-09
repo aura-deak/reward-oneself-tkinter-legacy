@@ -11,7 +11,7 @@ import webbrowser
 from datetime import datetime
 import json
 from filehandler import FileHandler
-import ai
+import xinghuoai
 import get_api
 import sparkAPI
 import hitokoto
@@ -120,7 +120,7 @@ def create_multiple_subwindow(items=None,dictionary=None,name="子窗口",allow_
         cancel_button.grid(row=len(items), column=3, columnspan=2, pady=10)
     subwindow.wait_window()
     if dictionary is None:
-        return value
+        return None
     else:
         list = []
         for i in value:
@@ -145,7 +145,8 @@ def fresh_and_save():
         'effort_experience' : task.effort_experience,
         "tasks_time" : task.tasks_time,
         'reward_experience' : reward.reward_experience,
-        'hitokoto_url' : hitokoto_url
+        'hitokoto_url' : hitokoto_url,
+        'enable_ai' : enable_ai
     }
     datafile.write_as_json(data)
     
@@ -167,7 +168,8 @@ def reset(showinfo = True):
             'effort_experience' : {"阅读":[]},
             'reward_experience' : {"喝奶茶":[]},
             'tasks_time' : {"阅读":60},
-            'hitokoto_url' : "https://v1.hitokoto.cn/?c=d&c=i&c=k&encode=text"
+            'hitokoto_url' : "https://v1.hitokoto.cn/?c=d&c=i&c=k&encode=text",
+            'enable_ai' : False
         }
         datafile.write_as_json(data)
         messagebox.showinfo("重置成功","重置成功，请重启程序")
@@ -182,11 +184,27 @@ def change_hitokoto_url():
 
     global hitokoto_url
     hitokoto_url = "https://v1.hitokoto.cn/?"
-    for value in answer:
-        hitokoto_url += c[value]
+    if not answer is None:
+        for value in answer:
+            hitokoto_url += c[value]
     hitokoto_url += "encode=text"
     fresh_and_save()
 
+def change_optional_features():
+    global enable_ai
+    optionals = create_multiple_subwindow(["启用AI"],name="更改功能",allow_cancel=True)
+    if optionals is not None:
+        if "启用AI" in optionals:
+            enable_ai = True
+        else:
+            enable_ai = False
+    fresh_and_save()
+def ai():
+    if enable_ai:
+        xinghuoai.make_report()
+    else:
+        messagebox.showinfo("提示","AI功能未启用，请前往“可选功能”启用")
+        
 class Tasks():
     def __init__(self):
         self.tasks = data["tasks"]
@@ -357,15 +375,13 @@ root.resizable(False, False)
 try:
     data = datafile.load()
     point = data["point"]
+    enable_ai = data["enable_ai"]
+
 except FileNotFoundError:
     reset(showinfo=False)
     sys.exit()
 
 hitokoto_url = data["hitokoto_url"]
-
-api = FileHandler("data/api.txt")
-if not api.check():
-    get_api.get_api_credentials()
 
 
 reward = Rewards()
@@ -399,7 +415,10 @@ view_introduction_button.place(x=710,y=550)
 change_hitokoto_url_button = tkinter.ttk.Button(root, text="更改名言喜好", command=change_hitokoto_url)
 change_hitokoto_url_button.place(x=0,y=600)
 
-report_button = tkinter.ttk.Button(root, text="生成报告", command=ai.make_report)
-report_button.place(x=710,y=600)
+optional_features = tkinter.ttk.Button(root, text="可选功能", command=change_optional_features)
+optional_features.place(x=355,y=600)  # 原位置x=0,y=500
+
+report_button = tkinter.ttk.Button(root, text="生成报告", command=ai)
+report_button.place(x=710,y=600)  # 保持原y坐标不变
 
 root.mainloop()
