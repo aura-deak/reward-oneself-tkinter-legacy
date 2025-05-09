@@ -48,6 +48,8 @@ def create_subwindow(items=None,dictionary=None,name="子窗口",allow_cancel=Tr
     subwindow = tkinter.Toplevel(root)
     subwindow.title(name)
     subwindow.attributes('-topmost', 'true')
+    if not allow_cancel:
+        subwindow.protocol("WM_DELETE_WINDOW", lambda: None)
 
     if items == None:
         items = list(dictionary.keys())
@@ -89,6 +91,9 @@ def create_multiple_subwindow(items=None,dictionary=None,name="子窗口",allow_
     subwindow = tkinter.Toplevel(root)
     subwindow.title(name)
     subwindow.attributes('-topmost', 'true')
+    if not allow_cancel:
+        subwindow.protocol("WM_DELETE_WINDOW", lambda: None)
+
     values = {}
 
     if items is None:
@@ -196,8 +201,6 @@ def change_optional_features():
     if optionals is not None:
         if "启用AI" in optionals:
             enable_ai = True
-        else:
-            enable_ai = False
     fresh_and_save()
 def ai():
     if enable_ai:
