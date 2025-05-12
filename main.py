@@ -209,10 +209,8 @@ def change_optional_features():
     if optionals is not None:
         if "启用AI" in optionals:
             enable_ai = True
-            print("启用AI")
         else:
             enable_ai = False
-            print("禁用AI")
     fresh_and_save()
 def ai():
     if enable_ai:
@@ -386,6 +384,8 @@ root = tkinter.Tk()
 root.title("奖励自己")
 root.geometry("800x650")
 root.resizable(False, False)
+
+root.protocol("WM_DELETE_WINDOW", sys.exit)
 
 try:
     data = datafile.load()
