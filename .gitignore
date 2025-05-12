@@ -3,3 +3,6 @@ __pycache__
 .vscode
 reward_oneself
 venv
+main.spec
+build
+dist
