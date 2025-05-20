@@ -209,15 +209,8 @@ def change_optional_features():
     if optionals is not None:
         if "启用AI" in optionals:
             enable_ai = True
-<<<<<<< HEAD
         else:
             enable_ai = False
-=======
-            print("启用AI")
-        else:
-            enable_ai = False
-            print("禁用AI")
->>>>>>> 6816cf3273b22acbe9503404a43ff52a11bc0a6f
     fresh_and_save()
 def ai():
     if enable_ai:
