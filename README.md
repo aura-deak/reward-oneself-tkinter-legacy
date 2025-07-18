@@ -1,5 +1,9 @@
 # 奖励自己
 
+> [!CAUTION]
+> **此仓库已停止开发**
+> 该项目的tkinter版本已经停止开发，请前往[flask版本](https://github.com/reward-oneself/reward_oneself)
+
 **软件名称：** 奖励自己
 
 **标语：** 努力累了,也别忘了好好奖励一下自己。
