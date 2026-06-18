@@ -4,6 +4,9 @@
 > **此仓库已停止开发**
 > 该项目的tkinter版本已经停止开发，请前往[flask版本](https://github.com/reward-oneself/reward_oneself)
 
+> [!NOTE]
+> 源仓库`https://gitee.com/chen-shuhan-1/reward-oneself`，因为发生了[2FA失效事件](https://github.com/aura-deak/blog/blob/main/%E6%88%91%E8%A2%AB%202FA%20%E6%8B%A6%E4%BD%8F%E4%BA%86%EF%BC%8C%E6%88%91%E5%A4%B1%E5%8E%BB%E4%BA%86%E5%AF%B9%E8%B4%A6%E5%8F%B7%E7%9A%84%E6%B0%B8%E4%B9%85%E8%AE%BF%E9%97%AE%E6%9D%83%E3%80%82%E7%9C%9F%E8%AE%BD%E5%88%BA.md)，顺便把这个仓库也搬一下。
+
 **软件名称：** 奖励自己
 
 **标语：** 努力累了,也别忘了好好奖励一下自己。
